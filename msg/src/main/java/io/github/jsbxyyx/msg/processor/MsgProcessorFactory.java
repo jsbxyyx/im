@@ -1,4 +1,4 @@
-package io.github.jsbxyyx.server.netty;
+package io.github.jsbxyyx.msg.processor;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,7 +10,7 @@ import java.util.ServiceLoader;
  */
 public class MsgProcessorFactory {
 
-    private static final Map<String, MsgProcessor> SERVER_MAP = new HashMap<>();
+    private static final Map<Byte, MsgProcessor> SERVER_MAP = new HashMap<>();
 
     static {
         ServiceLoader<MsgProcessor> load = ServiceLoader.load(MsgProcessor.class);
@@ -21,7 +21,7 @@ public class MsgProcessorFactory {
         }
     }
 
-    public static MsgProcessor get(String type) {
+    public static MsgProcessor get(byte type) {
         MsgProcessor processor = SERVER_MAP.get(type);
         if (processor != null) {
             return processor;

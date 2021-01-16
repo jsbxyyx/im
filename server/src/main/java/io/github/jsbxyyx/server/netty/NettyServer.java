@@ -1,5 +1,6 @@
 package io.github.jsbxyyx.server.netty;
 
+import io.github.jsbxyyx.common.ThreadFactoryImpl;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

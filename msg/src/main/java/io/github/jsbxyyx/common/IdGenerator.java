@@ -1,4 +1,4 @@
-package io.github.jsbxyyx.server.netty;
+package io.github.jsbxyyx.common;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

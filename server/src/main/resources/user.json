@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "username": "admin",
+    "password": "admin",
+    "group": "1",
+    "groupName": "讨论组"
+  },
+  "root": {
+    "username": "root",
+    "password": "root",
+    "group": "1",
+    "groupName": "讨论组"
+  }
+}

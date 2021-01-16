@@ -1,5 +1,6 @@
 package io.github.jsbxyyx.server.netty;
 
+import io.github.jsbxyyx.msg.Msg;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -27,11 +28,11 @@ public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
             // MessageId 4B 消息Id
             // HeadMap ?B key:string:length(2B)+data value:string:length(4B)+data
             // Body ?B (FullLength-HeadLength) 请求体:长度为总长度-头长度
-            int fullLength = 14;
-            int headLength = 2;
+            int fullLength = Constants.FULL_LENGTH;
+            int headLength = Constants.HEAD_LENGTH;
 
-            out.writeBytes(new byte[]{(byte) 0xca, (byte) 0xca});
-            out.writeByte((byte) 1);
+            out.writeBytes(Constants.MAGIC);
+            out.writeByte(Constants.VERSION);
 
             byte type = msg.getType();
             // full Length(4B) and head length(2B) will fix in the end.
@@ -46,11 +47,10 @@ public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
                 headLength += headMapBytesLength;
                 fullLength += headMapBytesLength;
             }
-
             byte[] bodyBytes = null;
-            if (type != HeartbeatMsg.TYPE) {
-                // heartbeat has no body
-                bodyBytes = encrypt(msg.encode());
+            if (msg.getBody() != null) {
+                byte[] bytes = SerializerFactory.get().serialize(msg.getBody());
+                bodyBytes = EncryptionFactory.get(headMap.get("token")).encrypt(bytes);
                 fullLength += bodyBytes.length;
             }
 
@@ -73,7 +73,7 @@ public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
         }
     }
 
-    private byte[] encrypt(Object body) {
+    private byte[] encrypt(byte[] body) {
         // TODO
         return new byte[0];
     }
@@ -105,5 +105,7 @@ public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
             out.writeBytes(bs);
         }
     }
+
+
 
 }

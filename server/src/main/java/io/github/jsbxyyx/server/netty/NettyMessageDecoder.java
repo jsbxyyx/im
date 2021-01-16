@@ -1,5 +1,6 @@
 package io.github.jsbxyyx.server.netty;
 
+import io.github.jsbxyyx.msg.Msg;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -25,8 +26,8 @@ public class NettyMessageDecoder extends ByteToMessageDecoder {
     private Object decoded(ByteBuf frame) {
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
-        if (0xca != b0 || 0xca != b1) {
-            throw new IllegalArgumentException("Unknown magic code: " + b0 + ", " + b1);
+        if (Constants.MAGIC[0] != b0 || Constants.MAGIC[1] != b1) {
+            throw new IllegalArgumentException("magic : " + b0 + ", " + b1 + " illegal");
         }
 
         byte version = frame.readByte();
@@ -35,9 +36,7 @@ public class NettyMessageDecoder extends ByteToMessageDecoder {
         byte type = frame.readByte();
         int id = frame.readInt();
 
-
-
-        Msg msg = MsgFactory.create(type);
+        Msg msg = new Msg();
         msg.setId(id);
         msg.setType(type);
 
@@ -49,15 +48,13 @@ public class NettyMessageDecoder extends ByteToMessageDecoder {
         }
 
         // read body
-        if (type == HeartbeatMsg.TYPE) {
-            msg.setBody(new HeartbeatMsg());
-        } else {
-            int bodyLength = fullLength - headLength;
-            if (bodyLength > 0) {
-                byte[] bs = new byte[bodyLength];
-                frame.readBytes(bs);
-                msg.setBody(msg.decode(decrypt(bs)));
-            }
+        int bodyLength = fullLength - headLength;
+        if (bodyLength > 0) {
+            byte[] bs = new byte[bodyLength];
+            frame.readBytes(bs);
+            bs = EncryptionFactory.get(msg.getHeadMap().get("token")).decrypt(bs);
+            Object object = SerializerFactory.get().deserialize(bs);
+            msg.setBody(object);
         }
 
         return msg;
@@ -69,7 +66,7 @@ public class NettyMessageDecoder extends ByteToMessageDecoder {
     }
 
     private Map<String, String> decodeHeadMap(ByteBuf in, int length) {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(16);
         if (in == null || in.readableBytes() == 0 || length == 0) {
             return map;
         }
@@ -94,5 +91,6 @@ public class NettyMessageDecoder extends ByteToMessageDecoder {
             return new String(value, StandardCharsets.UTF_8);
         }
     }
+
 
 }
