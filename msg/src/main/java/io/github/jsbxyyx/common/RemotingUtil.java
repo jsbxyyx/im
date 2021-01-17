@@ -1,4 +1,4 @@
-package io.github.jsbxyyx.server.netty;
+package io.github.jsbxyyx.common;
 
 import io.netty.channel.Channel;
 

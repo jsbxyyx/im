@@ -17,7 +17,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Msg> {
     protected void channelRead0(ChannelHandlerContext ctx, Msg msg) throws Exception {
         Msg rsp;
         try {
-            rsp = MsgProcessorFactory.get(msg.getType()).handle(msg);
+            rsp = MsgProcessorFactory.get(msg.getType()).handle(ctx, msg);
         } catch (Throwable t) {
             if (t instanceof BasicException) {
                 BasicException se = (BasicException) t;

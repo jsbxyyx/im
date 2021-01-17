@@ -11,7 +11,7 @@ public class Msg {
     private int id;
     private byte type;
     private Map<String, String> headMap = new HashMap<>();
-    private Object body;
+    private MsgBody body;
 
     public void setId(int id) {
         this.id = id;
@@ -37,19 +37,31 @@ public class Msg {
         this.headMap = headMap;
     }
 
-    public Object getBody() {
+    public MsgBody getBody() {
         return body;
     }
 
-    public void setBody(Object body) {
+    public void setBody(MsgBody body) {
         this.body = body;
     }
 
-    public static Msg build(int id, byte type, Map<String, String> headMap, Object body) {
+    public String getToken() {
+        return getHeadMap().get("token");
+    }
+
+    public String getUsername() {
+        return getHeadMap().get("username");
+    }
+
+    public String getStatusCode() {
+        return getHeadMap().get("statusCode");
+    }
+
+    public static Msg build(int id, byte type, Map<String, String> headMap, MsgBody body) {
         return Msg.build(id, type, headMap, body, StatusCode.OK);
     }
 
-    public static Msg build(int id, byte type, Map<String, String> headMap, Object body, StatusCode statusCode) {
+    public static Msg build(int id, byte type, Map<String, String> headMap, MsgBody body, StatusCode statusCode) {
         Msg msg = new Msg();
         msg.setId(id);
         msg.setType(type);

@@ -5,7 +5,6 @@ package io.github.jsbxyyx.msg;
  */
 public class HeartbeatMsg implements MsgBody {
 
-    public static final int TYPE = 0;
     private boolean ping;
 
     public boolean isPing() {
@@ -16,4 +15,8 @@ public class HeartbeatMsg implements MsgBody {
         this.ping = ping;
     }
 
+    @Override
+    public int getMsgType() {
+        return MsgType.Heartbeat;
+    }
 }

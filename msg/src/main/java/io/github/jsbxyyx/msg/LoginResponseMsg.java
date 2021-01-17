@@ -44,4 +44,8 @@ public class LoginResponseMsg implements MsgBody {
         this.groupName = groupName;
     }
 
+    @Override
+    public int getMsgType() {
+        return MsgType.LoginResponse;
+    }
 }

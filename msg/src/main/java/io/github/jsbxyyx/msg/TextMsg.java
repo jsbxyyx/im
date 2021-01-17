@@ -6,15 +6,24 @@ import java.util.Date;
  * @author
  * @since
  */
-public class TextMsg {
-
-    public static final byte TYPE = 2;
+public class TextMsg implements MsgBody {
 
     private String from; // 来自谁
     private String to; // 发给谁
-    private String type; // to的类型 1：组
+    private String toType; // to的类型 1：组
     private String text; // 文本内容
     private Date createTime; // 创建时间
+
+    public TextMsg() {
+    }
+
+    public TextMsg(String from, String to, String toType, String text, Date createTime) {
+        this.from = from;
+        this.to = to;
+        this.toType = toType;
+        this.text = text;
+        this.createTime = createTime;
+    }
 
     public String getFrom() {
         return from;
@@ -32,12 +41,17 @@ public class TextMsg {
         this.to = to;
     }
 
-    public String getType() {
-        return type;
+    @Override
+    public int getMsgType() {
+        return MsgType.Text;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getToType() {
+        return toType;
+    }
+
+    public void setToType(String toType) {
+        this.toType = toType;
     }
 
     public String getText() {

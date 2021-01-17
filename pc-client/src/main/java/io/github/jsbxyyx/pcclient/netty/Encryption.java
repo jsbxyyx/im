@@ -1,4 +1,4 @@
-package io.github.jsbxyyx.server.netty;
+package io.github.jsbxyyx.pcclient.netty;
 
 /**
  * @author

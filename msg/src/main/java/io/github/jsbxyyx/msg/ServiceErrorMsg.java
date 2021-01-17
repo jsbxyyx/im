@@ -32,4 +32,9 @@ public class ServiceErrorMsg implements MsgBody {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public int getMsgType() {
+        return MsgType.ServiceError;
+    }
 }

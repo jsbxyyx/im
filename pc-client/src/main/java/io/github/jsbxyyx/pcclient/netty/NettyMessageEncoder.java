@@ -1,4 +1,4 @@
-package io.github.jsbxyyx.server.netty;
+package io.github.jsbxyyx.pcclient.netty;
 
 import io.github.jsbxyyx.common.Constants;
 import io.github.jsbxyyx.common.RemotingUtil;
@@ -24,14 +24,6 @@ public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
     @Override
     protected void encode(ChannelHandlerContext ctx, Msg msg, ByteBuf out) throws Exception {
         try {
-            // MagicCode 0xcaca 2B 魔术位
-            // Version 1B 协议版本
-            // FullLength 4B 总长度：用于拆包，不包括前3位，包括自己4位
-            // HeadLength 2B 不包括前面7位，包括自己2位
-            // MessageType 1B 响应/心跳等
-            // MessageId 4B 消息Id
-            // HeadMap ?B key:string:length(2B)+data value:string:length(4B)+data
-            // Body ?B (FullLength-HeadLength) 请求体:长度为总长度-头长度
             int fullLength = Constants.FULL_LENGTH;
             int headLength = Constants.HEAD_LENGTH;
 
@@ -57,9 +49,9 @@ public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
                 out.writeInt(msgType);
                 fullLength += 4;
                 bodyBytes = SerializerFactory.get().serialize(msgType, msg.getBody());
-                if (!(msgType == MsgType.LoginResponse ||
+                if (!(msgType == MsgType.LoginRequest ||
                         msgType == MsgType.Heartbeat)) {
-                    bodyBytes = EncryptionFactory.getEncrypt(msg.getUsername()).encrypt(bodyBytes);
+                    bodyBytes = EncryptionFactory.getEncrypt().encrypt(bodyBytes);
                 }
                 fullLength += bodyBytes.length;
             }

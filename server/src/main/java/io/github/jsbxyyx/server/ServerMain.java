@@ -7,7 +7,7 @@ import io.github.jsbxyyx.server.service.UserService;
 /**
  * @author
  */
-public class Main {
+public class ServerMain {
 
     public static void main(String[] args) {
         UserService.init();

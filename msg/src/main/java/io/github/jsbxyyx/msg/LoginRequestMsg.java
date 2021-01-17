@@ -6,8 +6,6 @@ package io.github.jsbxyyx.msg;
  */
 public class LoginRequestMsg implements MsgBody {
 
-    public static final int TYPE = 1;
-
     private String username;
     private String password;
 
@@ -27,4 +25,8 @@ public class LoginRequestMsg implements MsgBody {
         this.password = password;
     }
 
+    @Override
+    public int getMsgType() {
+        return MsgType.LoginRequest;
+    }
 }

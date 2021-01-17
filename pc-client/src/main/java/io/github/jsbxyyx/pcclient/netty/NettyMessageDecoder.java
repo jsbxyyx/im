@@ -1,4 +1,4 @@
-package io.github.jsbxyyx.server.netty;
+package io.github.jsbxyyx.pcclient.netty;
 
 import io.github.jsbxyyx.common.Constants;
 import io.github.jsbxyyx.msg.Msg;
@@ -80,8 +80,8 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
             byte[] content = new byte[buffer.remaining()];
             buffer.get(content);
             if (!(msgType == MsgType.Heartbeat ||
-                    msgType == MsgType.LoginRequest)) {
-                content = EncryptionFactory.getDecrypt(msg.getToken()).decrypt(content);
+                    msgType == MsgType.LoginResponse)) {
+                content = EncryptionFactory.getDecrypt().decrypt(content);
             }
             MsgBody object = SerializerFactory.get().deserialize(msgType, content);
             msg.setBody(object);

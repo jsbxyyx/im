@@ -8,7 +8,10 @@ import io.github.jsbxyyx.server.exception.BasicException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -22,6 +25,11 @@ public class UserService {
 
     private static Map<String, User> USER_MAP;
 
+    /**
+     * key: group value: [user]
+     */
+    public static Map<String, List<User>> GROUP_MAP;
+
     public static void init() {
         InputStream in = null;
         try {
@@ -30,6 +38,20 @@ public class UserService {
                     new TypeToken<Map<String, User>>() {
                     }.getType());
             USER_MAP = Collections.unmodifiableMap(o);
+
+            Map<String, List<User>> map = new HashMap<>();
+            for (Map.Entry<String, User> entry : o.entrySet()) {
+                User value = entry.getValue();
+                String group = value.getGroup();
+                if (map.containsKey(group)) {
+                    map.get(group).add(value);
+                } else {
+                    List<User> list = new ArrayList<>();
+                    list.add(value);
+                    map.put(group, list);
+                }
+            }
+            GROUP_MAP = Collections.unmodifiableMap(map);
         } finally {
             try {
                 in.close();
@@ -47,5 +69,9 @@ public class UserService {
             throw new BasicException("0002", "password not right");
         }
         return user;
+    }
+
+    public static List<User> getUserListByGroup(String group) {
+        return Collections.unmodifiableList(GROUP_MAP.get(group));
     }
 }

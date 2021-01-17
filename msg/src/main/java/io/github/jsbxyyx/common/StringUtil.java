@@ -41,4 +41,7 @@ public class StringUtil {
         return bytes;
     }
 
+    public static boolean isBlank(String text) {
+        return text == null || "".equals(text.trim());
+    }
 }

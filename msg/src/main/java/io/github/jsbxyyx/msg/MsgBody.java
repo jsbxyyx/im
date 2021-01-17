@@ -6,4 +6,6 @@ package io.github.jsbxyyx.msg;
  */
 public interface MsgBody {
 
+    int getMsgType();
+
 }

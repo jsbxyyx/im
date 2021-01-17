@@ -1,1 +1,2 @@
-io.github.jsbxyyx.msg.processor.HeartbeatMsgProcessor
+io.github.jsbxyyx.msg.processor.AsyncMsgProcessor
+io.github.jsbxyyx.msg.processor.SyncMsgProcessor
