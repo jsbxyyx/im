@@ -3,7 +3,6 @@ package io.github.jsbxyyx.server.netty;
 import io.github.jsbxyyx.common.RemotingUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +15,9 @@ public class HeartbeatHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof IdleStateEvent) {
-            NettyChannelManager.remove(ctx.channel());
-        }
+//        if (evt instanceof IdleStateEvent) {
+//            NettyChannelManager.remove(ctx.channel());
+//        }
         super.userEventTriggered(ctx, evt);
     }
 

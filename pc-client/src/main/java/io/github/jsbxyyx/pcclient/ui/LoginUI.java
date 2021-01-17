@@ -1,6 +1,6 @@
 package io.github.jsbxyyx.pcclient.ui;
 
-import io.github.jsbxyyx.msg.HeartbeatMsg;
+import io.github.jsbxyyx.common.StringUtil;
 import io.github.jsbxyyx.msg.LoginRequestMsg;
 import io.github.jsbxyyx.msg.LoginResponseMsg;
 import io.github.jsbxyyx.msg.Msg;
@@ -8,6 +8,7 @@ import io.github.jsbxyyx.msg.ServiceErrorMsg;
 import io.github.jsbxyyx.msg.StatusCode;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.github.jsbxyyx.pcclient.netty.Global;
+import io.github.jsbxyyx.pcclient.service.HeartbeatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,14 +17,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author
  * @since
  */
-public class LoginUI extends JDialog implements ActionListener {
+public class LoginUI extends JFrame implements ActionListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginUI.class);
 
@@ -33,9 +32,9 @@ public class LoginUI extends JDialog implements ActionListener {
 
     public LoginUI() {
         setTitle("登录");
-        setSize(300, 200);
+        setSize(300, 120);
         setResizable(false);
-        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         setLayout(new FlowLayout());
 
@@ -64,9 +63,16 @@ public class LoginUI extends JDialog implements ActionListener {
         String actionCommand = e.getActionCommand();
         if (actionCommand.equalsIgnoreCase("LOGIN")) {
 
+            String username = tfUsername.getText();
+            String password = new String(pfPassword.getPassword());
+            if (StringUtil.isBlank(username) || StringUtil.isBlank(password)) {
+                JOptionPane.showMessageDialog(null, "用户名密码不能为空");
+                return ;
+            }
+
             LoginRequestMsg msg = new LoginRequestMsg();
-            msg.setUsername(tfUsername.getText());
-            msg.setPassword(new String(pfPassword.getPassword()));
+            msg.setUsername(username);
+            msg.setPassword(password);
             Msg rsp = ApplicationContext.sendSync(msg);
             String statusCode = rsp.getStatusCode();
             if (!Objects.equals(statusCode, StatusCode.OK.code)) {
@@ -82,27 +88,13 @@ public class LoginUI extends JDialog implements ActionListener {
             Global.setGroup(body.getGroup());
             Global.setGroupName(body.getGroupName());
 
-            startHeartbeat();
-
             this.dispose();
 
-            new MainUI().launch();
-        }
-    }
+            HeartbeatService.startHeartbeat();
 
-    private void startHeartbeat() {
-        ScheduledThreadPoolExecutor pool = new ScheduledThreadPoolExecutor(1);
-        pool.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    HeartbeatMsg msg = new HeartbeatMsg();
-                    msg.setPing(true);
-                    ApplicationContext.sendAsync(msg);
-                } catch (Exception e) {
-                    LOGGER.error("heartbeat failed.", e);
-                }
-            }
-        }, 0, 5 * 60 * 1000, TimeUnit.MILLISECONDS);
+            MainUI mainUI = new MainUI();
+            ApplicationContext.setMainUI(mainUI);
+            mainUI.launch();
+        }
     }
 }

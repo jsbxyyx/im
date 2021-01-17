@@ -19,6 +19,7 @@ public class NettyChannelManager {
     public static void add(Channel channel) {
         String id = channel.id().asLongText();
         map.put(id, channel);
+        LOGGER.info("channel register...");
     }
 
     public static Channel get(String clientId) {
@@ -27,6 +28,7 @@ public class NettyChannelManager {
 
     public static void remove(Channel channel) {
         map.remove(channel.id().asLongText());
+        LOGGER.info("channel remove...");
     }
 
 }

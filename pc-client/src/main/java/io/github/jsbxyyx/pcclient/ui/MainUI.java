@@ -3,6 +3,7 @@ package io.github.jsbxyyx.pcclient.ui;
 import io.github.jsbxyyx.common.DateUtil;
 import io.github.jsbxyyx.common.StringUtil;
 import io.github.jsbxyyx.msg.TextMsg;
+import io.github.jsbxyyx.msg.TextMsgToType;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.github.jsbxyyx.pcclient.netty.Global;
 
@@ -36,9 +37,10 @@ public class MainUI extends JFrame implements ActionListener {
             }
         });
 
-        msgArea = new JTextArea(200, 560);
+        msgArea = new JTextArea(20, 48);
+        msgArea.setEditable(false);
         add(new JScrollPane(msgArea));
-        input = new JTextField(500);
+        input = new JTextField(40);
         add(input);
 
         send = new JButton("发送");
@@ -57,26 +59,32 @@ public class MainUI extends JFrame implements ActionListener {
         String actionCommand = e.getActionCommand();
         if (actionCommand.equalsIgnoreCase("SEND")) {
             if (!StringUtil.isBlank(input.getText())) {
-                StringBuilder builder = new StringBuilder();
-                Date date = new Date();
-                builder.append(Global.getUsername())
-                        .append("    ")
-                        .append(DateUtil.format(date, "yyyy-MM-dd HH:mm:ss"))
-                        .append("\n")
-                        .append(input.getText())
-                        .append("\n");
-
-                msgArea.append(builder.toString());
-                input.setText("");
 
                 TextMsg msg = new TextMsg();
-                msg.setCreateTime(date);
+                msg.setCreateTime(new Date());
                 msg.setFrom(Global.getUsername());
                 msg.setTo(Global.getGroup());
-                msg.setToType("1");
+                msg.setToType(TextMsgToType.TO_TYPE_GROUP);
                 msg.setText(input.getText());
+
+                appendMsg(msg);
+
                 ApplicationContext.sendAsync(msg);
+
+                input.setText("");
             }
         }
+    }
+
+    public void appendMsg(TextMsg textMsg) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(textMsg.getFrom())
+                .append("    ")
+                .append(DateUtil.format(textMsg.getCreateTime(), "yyyy-MM-dd HH:mm:ss"))
+                .append("\n")
+                .append(textMsg.getText())
+                .append("\n");
+
+        msgArea.append(builder.toString());
     }
 }

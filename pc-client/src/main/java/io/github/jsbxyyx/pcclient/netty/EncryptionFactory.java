@@ -23,7 +23,7 @@ public class EncryptionFactory {
         return new Decryption() {
             @Override
             public byte[] decrypt(byte[] bytes) {
-                return AESUtil.encrypt(key, bytes);
+                return AESUtil.decrypt(key, bytes);
             }
         };
     }

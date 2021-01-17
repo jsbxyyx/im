@@ -4,8 +4,10 @@ import io.github.jsbxyyx.common.Constants;
 import io.github.jsbxyyx.common.IdGenerator;
 import io.github.jsbxyyx.msg.Msg;
 import io.github.jsbxyyx.msg.MsgBody;
+import io.github.jsbxyyx.msg.TextMsg;
 import io.github.jsbxyyx.pcclient.netty.Global;
 import io.github.jsbxyyx.pcclient.netty.NettyClient;
+import io.github.jsbxyyx.pcclient.ui.MainUI;
 import io.netty.channel.Channel;
 
 import java.util.HashMap;
@@ -20,21 +22,18 @@ public class ApplicationContext {
 
     private static NettyClient nettyClient;
     private static Channel channel;
+    private static MainUI mainUI;
 
     public static void setNettyClient(NettyClient nc) {
         nettyClient = nc;
-    }
-
-    public static NettyClient getNettyClient() {
-        return nettyClient;
     }
 
     public static void setChannel(Channel ch) {
         channel = ch;
     }
 
-    public static Channel getChannel() {
-        return channel;
+    public static void setMainUI(MainUI mainUI) {
+        ApplicationContext.mainUI = mainUI;
     }
 
     public static Msg sendSync(MsgBody msgBody) {
@@ -60,6 +59,13 @@ public class ApplicationContext {
         }
         Msg msg = Msg.build(IdGenerator.getInstance().incrementAndGet(), Constants.ASYNC, headMap, msgBody);
         nettyClient.sendAsync(channel, msg);
+    }
+
+    public static void appendMsg(TextMsg textMsg) {
+        if (mainUI == null) {
+            throw new IllegalStateException("mainUI is null");
+        }
+        mainUI.appendMsg(textMsg);
     }
 
     private static void checkNettyClient() {
