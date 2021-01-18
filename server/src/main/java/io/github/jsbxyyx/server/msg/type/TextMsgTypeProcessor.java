@@ -53,7 +53,7 @@ public class TextMsgTypeProcessor implements MsgTypeProcessor {
             }
             Channel channel = NettyChannelManager.get(Global.getChannel(user.getUsername()));
             if (channel == null) {
-                LOGGER.info("[{}] channel not found", user.getUsername());
+                LOGGER.info("[{}] channel not online", user.getUsername());
                 continue;
             }
             Msg m = new Msg();

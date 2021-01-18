@@ -6,6 +6,8 @@ import io.github.jsbxyyx.msg.TextMsg;
 import io.github.jsbxyyx.msg.TextMsgToType;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.github.jsbxyyx.pcclient.netty.Global;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +23,8 @@ import java.util.Date;
  */
 public class MainUI extends JFrame implements ActionListener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainUI.class);
+
     private JTextArea msgArea;
     private JTextField input;
     private JButton send;
@@ -32,7 +36,8 @@ public class MainUI extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(WindowEvent e) {
+            public void windowClosing(WindowEvent e) {
+                LOGGER.warn("main ui closed...");
                 ApplicationContext.shutdown();
             }
         });
