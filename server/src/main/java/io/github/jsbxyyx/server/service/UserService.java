@@ -1,8 +1,7 @@
 package io.github.jsbxyyx.server.service;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import io.github.jsbxyyx.common.GsonUtil;
 import io.github.jsbxyyx.msg.ErrorCode;
 import io.github.jsbxyyx.server.exception.BasicException;
 
@@ -22,8 +21,6 @@ import java.util.Objects;
  */
 public class UserService {
 
-    private static final Gson Json = new GsonBuilder().disableHtmlEscaping().create();
-
     private static Map<String, User> USER_MAP;
 
     /**
@@ -35,7 +32,7 @@ public class UserService {
         InputStream in = null;
         try {
             in = UserService.class.getResourceAsStream("/user.json");
-            Map<String, User> o = Json.fromJson(new InputStreamReader(in),
+            Map<String, User> o = GsonUtil.get().fromJson(new InputStreamReader(in),
                     new TypeToken<Map<String, User>>() {
                     }.getType());
             USER_MAP = Collections.unmodifiableMap(o);
