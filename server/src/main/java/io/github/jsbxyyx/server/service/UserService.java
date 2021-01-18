@@ -3,6 +3,7 @@ package io.github.jsbxyyx.server.service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import io.github.jsbxyyx.msg.ErrorCode;
 import io.github.jsbxyyx.server.exception.BasicException;
 
 import java.io.IOException;
@@ -63,10 +64,10 @@ public class UserService {
     public static User login(String username, String password) {
         User user = USER_MAP.get(username);
         if (user == null) {
-            throw new BasicException("0001", "user not found");
+            throw new BasicException(ErrorCode.USER_NOT_FOUND);
         }
         if (!Objects.equals(user.getPassword(), password)) {
-            throw new BasicException("0002", "password not right");
+            throw new BasicException(ErrorCode.USER_PASSWORD_INCORRECT);
         }
         return user;
     }
