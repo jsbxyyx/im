@@ -13,6 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Date;
@@ -21,7 +23,7 @@ import java.util.Date;
  * @author
  * @since
  */
-public class MainUI extends JFrame implements ActionListener {
+public class MainUI extends JFrame implements ActionListener, KeyListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainUI.class);
 
@@ -46,6 +48,7 @@ public class MainUI extends JFrame implements ActionListener {
         msgArea.setEditable(false);
         add(new JScrollPane(msgArea));
         input = new JTextField(40);
+        input.addKeyListener(this);
         add(input);
 
         send = new JButton("发送");
@@ -63,33 +66,52 @@ public class MainUI extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String actionCommand = e.getActionCommand();
         if (actionCommand.equalsIgnoreCase("SEND")) {
-            if (!StringUtil.isBlank(input.getText())) {
-
-                TextMsg msg = new TextMsg();
-                msg.setCreateTime(new Date());
-                msg.setFrom(Global.getUsername());
-                msg.setTo(Global.getGroup());
-                msg.setToType(TextMsgToType.TO_TYPE_GROUP);
-                msg.setText(input.getText());
-
-                appendMsg(msg);
-
-                ApplicationContext.sendAsync(msg);
-
-                input.setText("");
-            }
+            sendMsg(input.getText());
         }
     }
 
     public void appendMsg(TextMsg textMsg) {
         StringBuilder builder = new StringBuilder();
         builder.append(textMsg.getFrom())
-                .append("    ")
+                .append("\t")
                 .append(DateUtil.format(textMsg.getCreateTime(), "yyyy-MM-dd HH:mm:ss"))
                 .append("\n")
                 .append(textMsg.getText())
                 .append("\n");
 
         msgArea.append(builder.toString());
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if(e.getSource() == input) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                sendMsg(input.getText());
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
+    }
+
+    private void sendMsg(String text) {
+        if (!StringUtil.isBlank(text)) {
+            TextMsg msg = new TextMsg();
+            msg.setCreateTime(new Date());
+            msg.setFrom(Global.getUsername());
+            msg.setTo(Global.getGroup());
+            msg.setToType(TextMsgToType.TO_TYPE_GROUP);
+            msg.setText(text);
+            appendMsg(msg);
+            ApplicationContext.sendAsync(msg);
+            input.setText("");
+        }
     }
 }
