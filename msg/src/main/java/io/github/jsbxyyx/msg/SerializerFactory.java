@@ -20,7 +20,7 @@ public class SerializerFactory {
             @Override
             public MsgBody deserialize(int msgType, byte[] bytes) {
                 Class aClass = MsgBodyFactory.get(msgType);
-                return (MsgBody) GsonUtil.get().fromJson(new String(bytes), aClass);
+                return (MsgBody) GsonUtil.get().fromJson(new String(bytes, StandardCharsets.UTF_8), aClass);
             }
         };
     }
