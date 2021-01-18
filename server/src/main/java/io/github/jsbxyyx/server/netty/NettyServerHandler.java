@@ -1,7 +1,7 @@
 package io.github.jsbxyyx.server.netty;
 
+import io.github.jsbxyyx.msg.ErrorMsg;
 import io.github.jsbxyyx.msg.Msg;
-import io.github.jsbxyyx.msg.ServiceErrorMsg;
 import io.github.jsbxyyx.msg.StatusCode;
 import io.github.jsbxyyx.msg.processor.MsgProcessorFactory;
 import io.github.jsbxyyx.server.exception.BasicException;
@@ -20,8 +20,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Msg> {
             rsp = MsgProcessorFactory.get(msg.getType()).handle(ctx, msg);
         } catch (Throwable t) {
             if (t instanceof BasicException) {
-                BasicException se = (BasicException) t;
-                rsp = Msg.build(msg.getId(), msg.getType(), msg.getHeadMap(), new ServiceErrorMsg(se.getCode(), se.getMessage()), StatusCode.BAD);
+                BasicException be = (BasicException) t;
+                rsp = Msg.build(msg.getId(), msg.getType(), msg.getHeadMap(), new ErrorMsg(be.getCode(), be.getMessage()), StatusCode.BAD);
             } else {
                 rsp = Msg.build(msg.getId(), msg.getType(), msg.getHeadMap(), null, StatusCode.ERROR);
             }

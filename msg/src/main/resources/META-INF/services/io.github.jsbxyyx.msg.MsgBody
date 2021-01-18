@@ -2,4 +2,4 @@ io.github.jsbxyyx.msg.HeartbeatMsg
 io.github.jsbxyyx.msg.LoginRequestMsg
 io.github.jsbxyyx.msg.LoginResponseMsg
 io.github.jsbxyyx.msg.TextMsg
-io.github.jsbxyyx.msg.ServiceErrorMsg
+io.github.jsbxyyx.msg.ErrorMsg

@@ -19,11 +19,11 @@ import java.util.Map;
 /**
  * @author
  */
-public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
+public class NettyClientDecoder extends LengthFieldBasedFrameDecoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NettyMessageDecoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientDecoder.class);
 
-    public NettyMessageDecoder() {
+    public NettyClientDecoder() {
         super(8 * 1024 * 1024, 3, 4,
                 -7, 0);
     }
@@ -79,8 +79,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
             int msgType = buffer.getInt();
             byte[] content = new byte[buffer.remaining()];
             buffer.get(content);
-            if (!(msgType == MsgType.Heartbeat ||
-                    msgType == MsgType.LoginResponse)) {
+            if (msgType == MsgType.Text) {
                 content = EncryptionFactory.getDecrypt().decrypt(content);
             }
             MsgBody object = SerializerFactory.get().deserialize(msgType, content);

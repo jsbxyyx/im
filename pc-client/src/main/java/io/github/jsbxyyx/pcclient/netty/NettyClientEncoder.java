@@ -17,9 +17,9 @@ import java.util.Map;
 /**
  * @author
  */
-public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
+public class NettyClientEncoder extends MessageToByteEncoder<Msg> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NettyMessageEncoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientEncoder.class);
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Msg msg, ByteBuf out) throws Exception {
@@ -49,8 +49,7 @@ public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
                 out.writeInt(msgType);
                 fullLength += 4;
                 bodyBytes = SerializerFactory.get().serialize(msgType, msg.getBody());
-                if (!(msgType == MsgType.LoginRequest ||
-                        msgType == MsgType.Heartbeat)) {
+                if (msgType == MsgType.Text) {
                     bodyBytes = EncryptionFactory.getEncrypt().encrypt(bodyBytes);
                 }
                 fullLength += bodyBytes.length;

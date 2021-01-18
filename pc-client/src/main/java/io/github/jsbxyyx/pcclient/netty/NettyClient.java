@@ -73,8 +73,8 @@ public class NettyClient {
                                 new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
                                         nettyClientConfig.getChannelMaxWriteIdleSeconds(),
                                         nettyClientConfig.getChannelMaxAllIdleSeconds()))
-                                .addLast(new NettyMessageDecoder())
-                                .addLast(new NettyMessageEncoder())
+                                .addLast(new NettyClientDecoder())
+                                .addLast(new NettyClientEncoder())
                                 .addLast(new ClientHandler());
                     }
                 });

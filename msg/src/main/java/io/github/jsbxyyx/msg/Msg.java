@@ -13,6 +13,8 @@ public class Msg {
     private Map<String, String> headMap = new HashMap<>();
     private MsgBody body;
 
+    private transient String username;
+
     public void setId(int id) {
         this.id = id;
     }
@@ -49,8 +51,11 @@ public class Msg {
         return getHeadMap().get("token");
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
     public String getUsername() {
-        return getHeadMap().get("username");
+        return username;
     }
 
     public String getStatusCode() {
@@ -66,7 +71,9 @@ public class Msg {
         msg.setId(id);
         msg.setType(type);
         msg.getHeadMap().putAll(headMap);
-        msg.getHeadMap().put("statusCode", statusCode.code);
+        if (statusCode != null) {
+            msg.getHeadMap().put("statusCode", statusCode.code);
+        }
         msg.setBody(body);
         return msg;
     }

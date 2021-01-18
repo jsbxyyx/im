@@ -59,7 +59,7 @@ public class TextMsgTypeProcessor implements MsgTypeProcessor {
             Msg m = new Msg();
             m.setId(IdGenerator.getInstance().incrementAndGet());
             m.setType(msg.getType());
-            m.getHeadMap().put("username", user.getUsername());
+            m.setUsername(user.getUsername());
             m.setBody(new TextMsg(from, to, toType, text, createTime));
             channel.writeAndFlush(m);
         }

@@ -57,8 +57,7 @@ public class NettyMessageEncoder extends MessageToByteEncoder<Msg> {
                 out.writeInt(msgType);
                 fullLength += 4;
                 bodyBytes = SerializerFactory.get().serialize(msgType, msg.getBody());
-                if (!(msgType == MsgType.LoginResponse ||
-                        msgType == MsgType.Heartbeat)) {
+                if (msgType == MsgType.Text) {
                     bodyBytes = EncryptionFactory.getEncrypt(msg.getUsername()).encrypt(bodyBytes);
                 }
                 fullLength += bodyBytes.length;

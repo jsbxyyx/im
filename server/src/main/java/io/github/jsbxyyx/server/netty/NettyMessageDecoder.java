@@ -24,7 +24,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyMessageDecoder.class);
 
     public NettyMessageDecoder() {
-        super(8 * 1024 * 1024, 3, 4,
+        super(1 * 1024 * 1024 * 1024, 3, 4,
                 -7, 0);
     }
 
@@ -79,8 +79,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
             int msgType = buffer.getInt();
             byte[] content = new byte[buffer.remaining()];
             buffer.get(content);
-            if (!(msgType == MsgType.Heartbeat ||
-                    msgType == MsgType.LoginRequest)) {
+            if (msgType == MsgType.Text) {
                 content = EncryptionFactory.getDecrypt(msg.getToken()).decrypt(content);
             }
             MsgBody object = SerializerFactory.get().deserialize(msgType, content);

@@ -4,15 +4,15 @@ package io.github.jsbxyyx.msg;
  * @author
  * @since
  */
-public class ServiceErrorMsg implements MsgBody {
+public class ErrorMsg implements MsgBody {
 
     private String code;
     private String message;
 
-    public ServiceErrorMsg() {
+    public ErrorMsg() {
     }
 
-    public ServiceErrorMsg(String code, String message) {
+    public ErrorMsg(String code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -35,6 +35,6 @@ public class ServiceErrorMsg implements MsgBody {
 
     @Override
     public int getMsgType() {
-        return MsgType.ServiceError;
+        return MsgType.Error;
     }
 }

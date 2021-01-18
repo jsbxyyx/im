@@ -1,10 +1,10 @@
 package io.github.jsbxyyx.pcclient.ui;
 
 import io.github.jsbxyyx.common.StringUtil;
+import io.github.jsbxyyx.msg.ErrorMsg;
 import io.github.jsbxyyx.msg.LoginRequestMsg;
 import io.github.jsbxyyx.msg.LoginResponseMsg;
 import io.github.jsbxyyx.msg.Msg;
-import io.github.jsbxyyx.msg.ServiceErrorMsg;
 import io.github.jsbxyyx.msg.StatusCode;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.github.jsbxyyx.pcclient.netty.Global;
@@ -85,7 +85,7 @@ public class LoginUI extends JFrame implements ActionListener {
             Msg rsp = ApplicationContext.sendSync(msg);
             String statusCode = rsp.getStatusCode();
             if (!Objects.equals(statusCode, StatusCode.OK.code)) {
-                ServiceErrorMsg error = (ServiceErrorMsg) rsp.getBody();
+                ErrorMsg error = (ErrorMsg) rsp.getBody();
                 JOptionPane.showMessageDialog(null, error.getMessage());
                 return ;
             }

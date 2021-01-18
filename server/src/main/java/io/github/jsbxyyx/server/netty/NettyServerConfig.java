@@ -12,8 +12,6 @@ public class NettyServerConfig {
     public static final PooledByteBufAllocator DIRECT_BYTE_BUF_ALLOCATOR =
             new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
-    public static final String PROPERTY_PREFIX = "netty.server";
-
     private static final int DEFAULT_LISTEN_PORT = 20669;
     private static final String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     private static final String EPOLL_SELECTOR_THREAD_PREFIX = "NettyServerEPollSelector";
