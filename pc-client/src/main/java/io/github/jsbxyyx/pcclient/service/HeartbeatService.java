@@ -20,13 +20,15 @@ public class HeartbeatService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatService.class);
 
-    private static final ScheduledThreadPoolExecutor HEARTBEAT_POOL = new ScheduledThreadPoolExecutor(1);
+    private static ScheduledThreadPoolExecutor HEARTBEAT_POOL = new ScheduledThreadPoolExecutor(1);
 
     private static final ThreadPoolExecutor CONNECT_POOL = new ThreadPoolExecutor(1, 1,
             60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1024),
             new ThreadPoolExecutor.DiscardPolicy());
 
     public static void startHeartbeat() {
+        HEARTBEAT_POOL.shutdownNow();
+        HEARTBEAT_POOL = new ScheduledThreadPoolExecutor(1);
         HEARTBEAT_POOL.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {

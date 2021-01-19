@@ -84,7 +84,11 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
         msgArea.append(builder.toString());
     }
 
-    public void scrollBottom() {
+    public int getScrollValue() {
+        return pane.getVerticalScrollBar().getMaximum();
+    }
+
+    public void scrollBottom(int oldValue) {
         pane.getVerticalScrollBar().setValue(pane.getVerticalScrollBar().getMaximum());
     }
 
@@ -115,7 +119,7 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
             msg.setTo(Global.getGroup());
             msg.setToType(TextMsgToType.TO_TYPE_GROUP);
             msg.setText(text);
-            appendMsg(msg);
+            ApplicationContext.appendMsg(msg);
             ApplicationContext.sendAsync(msg);
             input.setText("");
         }

@@ -72,8 +72,9 @@ public class ApplicationContext {
         if (mainUI == null) {
             throw new IllegalStateException("mainUI is null");
         }
+        int oldValue = ((MainUI) mainUI).getScrollValue();
         ((MainUI) mainUI).appendMsg(textMsg);
-        ((MainUI) mainUI).scrollBottom();
+        ((MainUI) mainUI).scrollBottom(oldValue);
         mainUI.setVisible(true);
     }
 
