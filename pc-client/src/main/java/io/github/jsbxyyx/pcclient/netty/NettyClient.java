@@ -133,8 +133,7 @@ public class NettyClient {
         try {
             return messageFuture.get(Constants.TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (Exception exx) {
-            LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), channel.remoteAddress(),
-                    msg.getBody());
+            LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), channel.remoteAddress(), msg.getBody());
             if (exx instanceof TimeoutException) {
                 throw (TimeoutException) exx;
             } else {

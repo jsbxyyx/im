@@ -63,6 +63,7 @@ public class LoginUI extends JFrame implements ActionListener {
     }
 
     public void launch() {
+        ApplicationContext.setMainUI(this);
         setLocationRelativeTo(null);
         setVisible(true);
     }
@@ -82,7 +83,13 @@ public class LoginUI extends JFrame implements ActionListener {
             LoginRequestMsg msg = new LoginRequestMsg();
             msg.setUsername(username);
             msg.setPassword(password);
-            Msg rsp = ApplicationContext.sendSync(msg);
+            Msg rsp = null;
+            try {
+                rsp = ApplicationContext.sendSync(msg);
+            } catch (Exception ex) {
+                HeartbeatService.reconnect();
+                return;
+            }
             String statusCode = rsp.getStatusCode();
             if (!Objects.equals(statusCode, StatusCode.OK.code)) {
                 ErrorMsg error = (ErrorMsg) rsp.getBody();
@@ -98,8 +105,6 @@ public class LoginUI extends JFrame implements ActionListener {
             Global.setGroupName(body.getGroupName());
 
             this.dispose();
-
-            HeartbeatService.startHeartbeat();
 
             MainUI mainUI = new MainUI();
             ApplicationContext.setMainUI(mainUI);

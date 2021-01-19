@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Global {
 
     private static final Map<String, byte[]> TOKEN = new ConcurrentHashMap<>();
-    private static final Map<String, String> USER_CHANNEL_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, String> USER_CHANNEL_ID_MAP = new ConcurrentHashMap<>();
 
     public static void putToken(String username, byte[] key) {
         TOKEN.put(username, key);
@@ -27,11 +27,11 @@ public class Global {
     }
 
     public static void putUserChannel(String username, String channelId) {
-        USER_CHANNEL_MAP.put(username, channelId);
+        USER_CHANNEL_ID_MAP.put(username, channelId);
     }
 
-    public static String getChannel(String username) {
-        return USER_CHANNEL_MAP.get(username);
+    public static String getChannelId(String username) {
+        return USER_CHANNEL_ID_MAP.get(username);
     }
 
 }

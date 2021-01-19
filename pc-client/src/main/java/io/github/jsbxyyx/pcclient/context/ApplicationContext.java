@@ -7,12 +7,15 @@ import io.github.jsbxyyx.msg.MsgBody;
 import io.github.jsbxyyx.msg.TextMsg;
 import io.github.jsbxyyx.pcclient.netty.Global;
 import io.github.jsbxyyx.pcclient.netty.NettyClient;
+import io.github.jsbxyyx.pcclient.netty.NettyClientConfig;
+import io.github.jsbxyyx.pcclient.service.ConfigService;
 import io.github.jsbxyyx.pcclient.ui.MainUI;
 import io.netty.channel.Channel;
 
+import javax.swing.*;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author
@@ -22,7 +25,11 @@ public class ApplicationContext {
 
     private static NettyClient nettyClient;
     private static Channel channel;
-    private static MainUI mainUI;
+    private static JFrame mainUI;
+
+    public static void init() {
+        ConfigService.init();
+    }
 
     public static void setNettyClient(NettyClient nc) {
         nettyClient = nc;
@@ -32,7 +39,7 @@ public class ApplicationContext {
         channel = ch;
     }
 
-    public static void setMainUI(MainUI mainUI) {
+    public static void setMainUI(JFrame mainUI) {
         ApplicationContext.mainUI = mainUI;
     }
 
@@ -46,7 +53,7 @@ public class ApplicationContext {
         try {
             Msg rsp = (Msg) nettyClient.sendSync(channel, msg);
             return rsp;
-        } catch (TimeoutException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -65,7 +72,9 @@ public class ApplicationContext {
         if (mainUI == null) {
             throw new IllegalStateException("mainUI is null");
         }
-        mainUI.appendMsg(textMsg);
+        ((MainUI) mainUI).appendMsg(textMsg);
+        ((MainUI) mainUI).scrollBottom();
+        mainUI.setVisible(true);
     }
 
     private static void checkNettyClient() {
@@ -80,4 +89,27 @@ public class ApplicationContext {
         }
         Global.clear();
     }
+
+    public static void connect() {
+        NettyClient nettyClient = new NettyClient(new NettyClientConfig());
+        nettyClient.start();
+
+        String host = ConfigService.getValue("host");
+        String[] split = host.split(":");
+
+        Channel newChannel = nettyClient.getNewChannel(new InetSocketAddress(split[0], Integer.parseInt(split[1])));
+
+        ApplicationContext.setNettyClient(nettyClient);
+        ApplicationContext.setChannel(newChannel);
+    }
+
+    public static void setNetworkStatus(boolean status) {
+        if (mainUI.getTitle().contains("......")) {
+            mainUI.setTitle(mainUI.getTitle().replace("在线", status ? "在线" : "离线")
+                    .replace("离线", status ? "在线" : "离线"));
+        } else {
+            mainUI.setTitle(mainUI.getTitle() + "......" + (status ? "在线" : "离线"));
+        }
+    }
+
 }

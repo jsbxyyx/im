@@ -1,6 +1,7 @@
 package io.github.jsbxyyx.server.msg.type;
 
 import io.github.jsbxyyx.common.IdGenerator;
+import io.github.jsbxyyx.common.StringUtil;
 import io.github.jsbxyyx.msg.Msg;
 import io.github.jsbxyyx.msg.MsgType;
 import io.github.jsbxyyx.msg.TextMsg;
@@ -51,7 +52,12 @@ public class TextMsgTypeProcessor implements MsgTypeProcessor {
             if (Objects.equals(user.getUsername(), from)) {
                 continue;
             }
-            Channel channel = NettyChannelManager.get(Global.getChannel(user.getUsername()));
+            String channelId = Global.getChannelId(user.getUsername());
+            if (StringUtil.isBlank(channelId)) {
+                LOGGER.info("[{}] channel not online", user.getUsername());
+                continue;
+            }
+            Channel channel = NettyChannelManager.get(channelId);
             if (channel == null) {
                 LOGGER.info("[{}] channel not online", user.getUsername());
                 continue;

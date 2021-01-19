@@ -28,6 +28,7 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainUI.class);
 
     private JTextArea msgArea;
+    private JScrollPane pane;
     private JTextField input;
     private JButton send;
 
@@ -46,7 +47,8 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
 
         msgArea = new JTextArea(20, 48);
         msgArea.setEditable(false);
-        add(new JScrollPane(msgArea));
+        pane = new JScrollPane(msgArea);
+        add(pane);
         input = new JTextField(40);
         input.addKeyListener(this);
         add(input);
@@ -80,6 +82,10 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
                 .append("\n");
 
         msgArea.append(builder.toString());
+    }
+
+    public void scrollBottom() {
+        pane.getVerticalScrollBar().setValue(pane.getVerticalScrollBar().getMaximum());
     }
 
     @Override

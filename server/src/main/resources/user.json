@@ -3,12 +3,36 @@
     "username": "admin",
     "password": "admin",
     "group": "1",
-    "groupName": "讨论组"
+    "groupName": "开发讨论组"
   },
   "root": {
     "username": "root",
     "password": "root",
     "group": "1",
-    "groupName": "讨论组"
+    "groupName": "开发讨论组"
+  },
+  "test": {
+    "username": "test",
+    "password": "test",
+    "group": "1",
+    "groupName": "开发讨论组"
+  },
+  "test2": {
+    "username": "test2",
+    "password": "test2",
+    "group": "1",
+    "groupName": "开发讨论组"
+  },
+  "test3": {
+    "username": "test3",
+    "password": "test3",
+    "group": "1",
+    "groupName": "开发讨论组"
+  },
+  "test4": {
+    "username": "test4",
+    "password": "test4",
+    "group": "1",
+    "groupName": "开发讨论组"
   }
 }
