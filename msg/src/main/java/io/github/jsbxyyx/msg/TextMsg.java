@@ -6,8 +6,9 @@ import java.util.Date;
  * @author
  * @since
  */
-public class TextMsg implements MsgBody {
+public class TextMsg implements MsgBody, AnyMsg {
 
+    private String id; // id
     private String from; // 来自谁
     private String to; // 发给谁
     private String toType; // to的类型 1：组
@@ -17,12 +18,21 @@ public class TextMsg implements MsgBody {
     public TextMsg() {
     }
 
-    public TextMsg(String from, String to, String toType, String text, Date createTime) {
+    public TextMsg(String id, String from, String to, String toType, String text, Date createTime) {
+        this.id = id;
         this.from = from;
         this.to = to;
         this.toType = toType;
         this.text = text;
         this.createTime = createTime;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getFrom() {

@@ -37,6 +37,7 @@ public class TextMsgTypeProcessor implements MsgTypeProcessor {
     public Msg handle(ChannelHandlerContext ctx, Msg msg) {
 
         TextMsg tm = (TextMsg) msg.getBody();
+        String id = tm.getId();
         String from = tm.getFrom();
         String to = tm.getTo();
         String toType = tm.getToType();
@@ -66,7 +67,7 @@ public class TextMsgTypeProcessor implements MsgTypeProcessor {
             m.setId(IdGenerator.getInstance().incrementAndGet());
             m.setType(msg.getType());
             m.setUsername(user.getUsername());
-            m.setBody(new TextMsg(from, to, toType, text, createTime));
+            m.setBody(new TextMsg(id, from, to, toType, text, createTime));
             channel.writeAndFlush(m);
         }
         return null;

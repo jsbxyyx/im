@@ -1,7 +1,9 @@
 package io.github.jsbxyyx.pcclient.context;
 
 import io.github.jsbxyyx.common.Constants;
+import io.github.jsbxyyx.common.DateUtil;
 import io.github.jsbxyyx.common.IdGenerator;
+import io.github.jsbxyyx.msg.AnyMsg;
 import io.github.jsbxyyx.msg.Msg;
 import io.github.jsbxyyx.msg.MsgBody;
 import io.github.jsbxyyx.msg.TextMsg;
@@ -16,6 +18,7 @@ import javax.swing.*;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author
@@ -26,6 +29,8 @@ public class ApplicationContext {
     private static NettyClient nettyClient;
     private static Channel channel;
     private static JFrame mainUI;
+
+    private static final Map<String, AnyMsg> MSG_MAP = new ConcurrentHashMap<>();
 
     public static void init() {
         ConfigService.init();
@@ -76,6 +81,7 @@ public class ApplicationContext {
         ((MainUI) mainUI).appendMsg(textMsg);
         ((MainUI) mainUI).scrollBottom(oldValue);
         mainUI.setVisible(true);
+        MSG_MAP.put(textMsg.getId(), textMsg);
     }
 
     private static void checkNettyClient() {
@@ -113,4 +119,42 @@ public class ApplicationContext {
         }
     }
 
+    public static String getStringById(String id) {
+        AnyMsg anyMsg = MSG_MAP.get(id);
+        if (anyMsg == null) {
+            return "";
+        }
+        if (anyMsg instanceof TextMsg) {
+            TextMsg tm = (TextMsg) anyMsg;
+            StringBuilder sb = new StringBuilder(tm.getFrom())
+                    .append(" ")
+                    .append(DateUtil.format(tm.getCreateTime(), "yyyy-MM-dd HH:mm:ss"))
+                    .append(" ")
+                    .append(tm.getText());
+            return sb.toString();
+        }
+        return "";
+    }
+
+    public static String getTextById(String id) {
+        AnyMsg anyMsg = MSG_MAP.get(id);
+        if (anyMsg == null) {
+            return "";
+        }
+        if (anyMsg instanceof TextMsg) {
+            TextMsg tm = (TextMsg) anyMsg;
+            return tm.getText();
+        }
+        return "";
+    }
+
+    public static void removeMsg(String id) {
+        ((MainUI) mainUI).removeMsg(id);
+        MSG_MAP.remove(id);
+    }
+
+    public static void removeMsg(JComponent comp) {
+        ((MainUI) mainUI).removeMsg(comp);
+        MSG_MAP.remove(comp.getName());
+    }
 }

@@ -49,7 +49,7 @@ public class NettyClientEncoder extends MessageToByteEncoder<Msg> {
                 out.writeInt(msgType);
                 fullLength += 4;
                 bodyBytes = SerializerFactory.get().serialize(msgType, msg.getBody());
-                if (msgType == MsgType.Text) {
+                if (MsgType.encrypt(msgType)) {
                     bodyBytes = EncryptionFactory.getEncrypt().encrypt(bodyBytes);
                 }
                 fullLength += bodyBytes.length;

@@ -11,13 +11,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.*;
 import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author
@@ -71,7 +70,7 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
     public void actionPerformed(ActionEvent e) {
         String actionCommand = e.getActionCommand();
         if (actionCommand.equalsIgnoreCase("SEND")) {
-            sendMsg(input.getText());
+            sendTextMsg(input.getText());
         }
     }
 
@@ -89,7 +88,53 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
                 .append("</html>");
 
         JLabel label = new JLabel();
+        label.setName(textMsg.getId());
         label.setText(builder.toString());
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent me) {
+                if (me.getButton() == MouseEvent.BUTTON3) {
+                    JPopupMenu pm = new JPopupMenu();
+                    JMenuItem copyAll, copy, del;
+                    copyAll = new JMenuItem("复制全部");
+                    copyAll.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            JLabel a = (JLabel) me.getSource();
+                            String id = a.getName();
+                            String text = ApplicationContext.getStringById(id);
+                            Transferable trans = new StringSelection(text);
+                            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
+                            pm.setVisible(false);
+                        }
+                    });
+                    pm.add(copyAll);
+                    copy = new JMenuItem("复制内容");
+                    copy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            JLabel a = (JLabel) me.getSource();
+                            String id = a.getName();
+                            String text = ApplicationContext.getTextById(id);
+                            Transferable trans = new StringSelection(text);
+                            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
+                            pm.setVisible(false);
+                        }
+                    });
+                    pm.add(copy);
+                    del = new JMenuItem("删除");
+                    del.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            JLabel a = (JLabel) me.getSource();
+                            ApplicationContext.removeMsg(a);
+                        }
+                    });
+                    pm.add(del);
+                    pm.show((Component) me.getSource(), me.getX(), me.getY());
+                }
+            }
+        });
         msgArea.add(label);
     }
 
@@ -114,7 +159,7 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
     public void keyPressed(KeyEvent e) {
         if (e.getSource() == input) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                sendMsg(input.getText());
+                sendTextMsg(input.getText());
             }
         }
     }
@@ -124,9 +169,10 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
 
     }
 
-    private void sendMsg(String text) {
+    private void sendTextMsg(String text) {
         if (!StringUtil.isBlank(text)) {
             TextMsg msg = new TextMsg();
+            msg.setId(UUID.randomUUID().toString());
             msg.setCreateTime(new Date());
             msg.setFrom(Global.getUsername());
             msg.setTo(Global.getGroup());
@@ -136,5 +182,25 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
             ApplicationContext.sendAsync(msg);
             input.setText("");
         }
+    }
+
+    private void sendImageMsg(String base64) {
+
+    }
+
+    public void removeMsg(String id) {
+        Component[] components = msgArea.getComponents();
+        for (Component comp : components) {
+            if (Objects.equals(comp.getName(), id)) {
+                msgArea.remove(comp);
+                msgArea.updateUI();
+                break;
+            }
+        }
+    }
+
+    public void removeMsg(JComponent comp) {
+        msgArea.remove(comp);
+        msgArea.updateUI();
     }
 }

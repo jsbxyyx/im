@@ -79,7 +79,7 @@ public class NettyClientDecoder extends LengthFieldBasedFrameDecoder {
             int msgType = buffer.getInt();
             byte[] content = new byte[buffer.remaining()];
             buffer.get(content);
-            if (msgType == MsgType.Text) {
+            if (MsgType.decrypt(msgType)) {
                 content = EncryptionFactory.getDecrypt().decrypt(content);
             }
             MsgBody object = SerializerFactory.get().deserialize(msgType, content);
