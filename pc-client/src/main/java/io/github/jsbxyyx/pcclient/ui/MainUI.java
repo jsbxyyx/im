@@ -27,8 +27,8 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainUI.class);
 
-    private JTextArea msgArea;
-    private JScrollPane pane;
+    private JPanel msgArea;
+    private JScrollPane sp_pane;
     private JTextField input;
     private JButton send;
 
@@ -45,10 +45,13 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
             }
         });
 
-        msgArea = new JTextArea(20, 48);
-        msgArea.setEditable(false);
-        pane = new JScrollPane(msgArea);
-        add(pane);
+        msgArea = new JPanel();
+        msgArea.setLayout(new BoxLayout(msgArea, BoxLayout.Y_AXIS));
+        sp_pane = new JScrollPane();
+        sp_pane.setPreferredSize(new Dimension(590, 300));
+        sp_pane.setViewportView(msgArea);
+        getContentPane().add(sp_pane);
+
         input = new JTextField(40);
         input.addKeyListener(this);
         add(input);
@@ -74,22 +77,32 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
 
     public void appendMsg(TextMsg textMsg) {
         StringBuilder builder = new StringBuilder();
-        builder.append(textMsg.getFrom())
-                .append("\t")
+        builder.append("<html>")
+                .append("<p>")
+                .append(textMsg.getFrom())
+                .append("&nbsp;&nbsp;&nbsp;&nbsp;")
                 .append(DateUtil.format(textMsg.getCreateTime(), "yyyy-MM-dd HH:mm:ss"))
-                .append("\n")
+                .append("</p>")
+                .append("<p>")
                 .append(textMsg.getText())
-                .append("\n");
+                .append("</p>")
+                .append("</html>");
 
-        msgArea.append(builder.toString());
+        JLabel label = new JLabel();
+        label.setText(builder.toString());
+        msgArea.add(label);
     }
 
     public int getScrollValue() {
-        return pane.getVerticalScrollBar().getMaximum();
+        return sp_pane.getVerticalScrollBar().getMaximum();
     }
 
     public void scrollBottom(int oldValue) {
-        pane.getVerticalScrollBar().setValue(pane.getVerticalScrollBar().getMaximum());
+        int maxHeight = sp_pane.getVerticalScrollBar().getMaximum();
+        System.out.println(String.format("oldValue : %s, newvalue : %s, result : %s",
+                oldValue, maxHeight, maxHeight - oldValue));
+        sp_pane.getViewport().setViewPosition(new Point(0, maxHeight + 30));
+        sp_pane.updateUI();
     }
 
     @Override
@@ -99,7 +112,7 @@ public class MainUI extends JFrame implements ActionListener, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(e.getSource() == input) {
+        if (e.getSource() == input) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 sendMsg(input.getText());
             }
