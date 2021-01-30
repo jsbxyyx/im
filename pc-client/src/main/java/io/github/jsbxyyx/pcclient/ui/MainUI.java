@@ -3,10 +3,7 @@ package io.github.jsbxyyx.pcclient.ui;
 import io.github.jsbxyyx.common.DateUtil;
 import io.github.jsbxyyx.common.IoUtil;
 import io.github.jsbxyyx.common.StringUtil;
-import io.github.jsbxyyx.msg.AnyMsg;
-import io.github.jsbxyyx.msg.ImageMsg;
-import io.github.jsbxyyx.msg.TextMsg;
-import io.github.jsbxyyx.msg.TextMsgToType;
+import io.github.jsbxyyx.msg.*;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.github.jsbxyyx.pcclient.netty.Global;
 import org.slf4j.Logger;
@@ -25,8 +22,10 @@ import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
+import java.util.Date;
 import java.util.List;
-import java.util.*;
+import java.util.Objects;
 
 /**
  * @author
@@ -278,30 +277,32 @@ public class MainUI extends JFrame {
 
     private void sendTextMsg(String text) {
         if (!StringUtil.isBlank(text)) {
-            TextMsg msg = new TextMsg();
-            msg.setId(UUID.randomUUID().toString());
-            msg.setCreateTime(new Date());
-            msg.setFrom(Global.getUsername());
-            msg.setTo(Global.getGroup());
-            msg.setToType(TextMsgToType.TO_TYPE_GROUP);
-            msg.setText(text);
-            ApplicationContext.appendMsg(msg);
-            ApplicationContext.sendAsync(msg);
+            TextMsg textMsg = new TextMsg();
+            textMsg.setCreateTime(new Date());
+            textMsg.setFrom(Global.getUsername());
+            textMsg.setTo(Global.getGroup());
+            textMsg.setToType(TextMsgToType.TO_TYPE_GROUP);
+            textMsg.setText(text);
+            Msg resultMsg = ApplicationContext.sendSync(textMsg);
+            IdMsg idMsg = (IdMsg) resultMsg.getBody();
+            textMsg.setId(idMsg.getId());
+            ApplicationContext.appendMsg(textMsg);
             input.setText("");
         }
     }
 
     private void sendImageMsg(String image) {
         if (!StringUtil.isBlank(image)) {
-            ImageMsg msg = new ImageMsg();
-            msg.setId(UUID.randomUUID().toString());
-            msg.setCreateTime(new Date());
-            msg.setFrom(Global.getUsername());
-            msg.setTo(Global.getGroup());
-            msg.setToType(TextMsgToType.TO_TYPE_GROUP);
-            msg.setImage(image);
-            ApplicationContext.appendMsg(msg);
-            ApplicationContext.sendAsync(msg);
+            ImageMsg imageMsg = new ImageMsg();
+            imageMsg.setCreateTime(new Date());
+            imageMsg.setFrom(Global.getUsername());
+            imageMsg.setTo(Global.getGroup());
+            imageMsg.setToType(TextMsgToType.TO_TYPE_GROUP);
+            imageMsg.setImage(image);
+            Msg resultMsg = ApplicationContext.sendSync(imageMsg);
+            IdMsg idMsg = (IdMsg) resultMsg.getBody();
+            imageMsg.setId(idMsg.getId());
+            ApplicationContext.appendMsg(imageMsg);
         }
     }
 

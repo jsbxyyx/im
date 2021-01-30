@@ -1,5 +1,6 @@
 package io.github.jsbxyyx.server.msg.type;
 
+import io.github.jsbxyyx.msg.IdMsg;
 import io.github.jsbxyyx.msg.Msg;
 import io.github.jsbxyyx.msg.MsgType;
 import io.github.jsbxyyx.msg.type.MsgTypeProcessor;
@@ -17,7 +18,7 @@ public class ImageServerMsgTypeProcessor implements MsgTypeProcessor {
 
     @Override
     public Msg handle(ChannelHandlerContext ctx, Msg msg) {
-        MsgForwardService.forward(msg);
-        return null;
+        String id = MsgForwardService.forward(msg);
+        return Msg.build(msg.getId(), msg.getType(), msg.getHeadMap(), new IdMsg(id));
     }
 }

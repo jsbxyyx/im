@@ -3,6 +3,7 @@ package io.github.jsbxyyx.server.msg.type;
 import io.github.jsbxyyx.common.IdGenerator;
 import io.github.jsbxyyx.common.StringUtil;
 import io.github.jsbxyyx.msg.*;
+import io.github.jsbxyyx.server.exception.BasicException;
 import io.github.jsbxyyx.server.netty.Global;
 import io.github.jsbxyyx.server.netty.NettyChannelManager;
 import io.github.jsbxyyx.server.service.User;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author
@@ -23,9 +25,9 @@ public class MsgForwardService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MsgForwardService.class);
 
-    public static void forward(Msg msg) {
+    public static String forward(Msg msg) {
         AnyMsg anyMsg = (AnyMsg) msg.getBody();
-        String id = anyMsg.getId();
+        String id = UUID.randomUUID().toString();
         String from = anyMsg.getFrom();
         String to = anyMsg.getTo();
         String toType = anyMsg.getToType();
@@ -54,11 +56,11 @@ public class MsgForwardService {
             ((ImageMsg) forwardMsg).setImage(content);
         } else {
             LOGGER.error("not support msg : {}", anyMsg.getClass());
-            return;
+            throw new BasicException(ErrorCode.MSG_NOT_SUPPORT);
         }
 
         if (!Objects.equals(toType, TextMsgToType.TO_TYPE_GROUP)) {
-            return;
+            throw new BasicException(ErrorCode.USER_TYPE_NOT_SUPPORT);
         }
 
         List<User> userList = UserService.getUserListByGroup(to);
@@ -83,6 +85,7 @@ public class MsgForwardService {
             m.setBody(anyMsg);
             channel.writeAndFlush(m);
         }
+        return id;
     }
 
 }

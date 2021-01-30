@@ -4,3 +4,4 @@ io.github.jsbxyyx.msg.LoginResponseMsg
 io.github.jsbxyyx.msg.ErrorMsg
 io.github.jsbxyyx.msg.TextMsg
 io.github.jsbxyyx.msg.ImageMsg
+io.github.jsbxyyx.msg.IdMsg
