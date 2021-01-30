@@ -2,17 +2,12 @@ package io.github.jsbxyyx.server.msg.type;
 
 import io.github.jsbxyyx.common.IdGenerator;
 import io.github.jsbxyyx.common.StringUtil;
-import io.github.jsbxyyx.msg.Msg;
-import io.github.jsbxyyx.msg.MsgType;
-import io.github.jsbxyyx.msg.TextMsg;
-import io.github.jsbxyyx.msg.TextMsgToType;
-import io.github.jsbxyyx.msg.type.MsgTypeProcessor;
+import io.github.jsbxyyx.msg.*;
 import io.github.jsbxyyx.server.netty.Global;
 import io.github.jsbxyyx.server.netty.NettyChannelManager;
 import io.github.jsbxyyx.server.service.User;
 import io.github.jsbxyyx.server.service.UserService;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,28 +19,46 @@ import java.util.Objects;
  * @author
  * @since
  */
-public class TextMsgTypeProcessor implements MsgTypeProcessor {
+public class MsgForwardService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TextMsgTypeProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MsgForwardService.class);
 
-    @Override
-    public int type() {
-        return MsgType.Text;
-    }
+    public static void forward(Msg msg) {
+        AnyMsg anyMsg = (AnyMsg) msg.getBody();
+        String id = anyMsg.getId();
+        String from = anyMsg.getFrom();
+        String to = anyMsg.getTo();
+        String toType = anyMsg.getToType();
+        Date createTime = anyMsg.getCreateTime();
 
-    @Override
-    public Msg handle(ChannelHandlerContext ctx, Msg msg) {
+        AnyMsg forwardMsg = null;
 
-        TextMsg tm = (TextMsg) msg.getBody();
-        String id = tm.getId();
-        String from = tm.getFrom();
-        String to = tm.getTo();
-        String toType = tm.getToType();
-        String text = tm.getText();
-        Date createTime = tm.getCreateTime();
+        String content = null;
+        if (anyMsg instanceof TextMsg) {
+            content = ((TextMsg) anyMsg).getText();
+            forwardMsg = new TextMsg();
+            forwardMsg.setId(id);
+            forwardMsg.setCreateTime(createTime);
+            forwardMsg.setFrom(from);
+            forwardMsg.setTo(to);
+            forwardMsg.setToType(toType);
+            ((TextMsg) forwardMsg).setText(content);
+        } else if (anyMsg instanceof ImageMsg) {
+            content = ((ImageMsg) anyMsg).getImage();
+            forwardMsg = new ImageMsg();
+            forwardMsg.setId(id);
+            forwardMsg.setCreateTime(createTime);
+            forwardMsg.setFrom(from);
+            forwardMsg.setTo(to);
+            forwardMsg.setToType(toType);
+            ((ImageMsg) forwardMsg).setImage(content);
+        } else {
+            LOGGER.error("not support msg : {}", anyMsg.getClass());
+            return;
+        }
 
         if (!Objects.equals(toType, TextMsgToType.TO_TYPE_GROUP)) {
-            return null;
+            return;
         }
 
         List<User> userList = UserService.getUserListByGroup(to);
@@ -67,9 +80,9 @@ public class TextMsgTypeProcessor implements MsgTypeProcessor {
             m.setId(IdGenerator.getInstance().incrementAndGet());
             m.setType(msg.getType());
             m.setUsername(user.getUsername());
-            m.setBody(new TextMsg(id, from, to, toType, text, createTime));
+            m.setBody(anyMsg);
             channel.writeAndFlush(m);
         }
-        return null;
     }
+
 }

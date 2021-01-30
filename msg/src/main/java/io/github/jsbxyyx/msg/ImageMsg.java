@@ -6,26 +6,23 @@ import java.util.Date;
  * @author
  * @since
  */
-public class TextMsg implements AnyMsg {
+public class ImageMsg implements AnyMsg {
 
-    private String id; // id
-    private String from; // 来自谁
-    private String to; // 发给谁
-    private String toType; // to的类型 1：组
-    private Date createTime; // 创建时间
-    private String text; // 文本内容
+    private String id;
+    private String from;
+    private String to;
+    private String toType;
+    private Date createTime;
 
-    public TextMsg() {
+    // data:image/png;base64,
+    // data:image/jpeg;base64,
+    private String image;
+
+    @Override
+    public int getMsgType() {
+        return MsgType.Image;
     }
 
-    public TextMsg(String id, String from, String to, String toType, String text, Date createTime) {
-        this.id = id;
-        this.from = from;
-        this.to = to;
-        this.toType = toType;
-        this.text = text;
-        this.createTime = createTime;
-    }
 
     @Override
     public String getId() {
@@ -58,11 +55,6 @@ public class TextMsg implements AnyMsg {
     }
 
     @Override
-    public int getMsgType() {
-        return MsgType.Text;
-    }
-
-    @Override
     public String getToType() {
         return toType;
     }
@@ -70,14 +62,6 @@ public class TextMsg implements AnyMsg {
     @Override
     public void setToType(String toType) {
         this.toType = toType;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 
     @Override
@@ -88,5 +72,13 @@ public class TextMsg implements AnyMsg {
     @Override
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

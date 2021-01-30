@@ -1,2 +1,3 @@
-io.github.jsbxyyx.server.msg.type.LoginRequestMsgTypeProcessor
-io.github.jsbxyyx.server.msg.type.TextMsgTypeProcessor
+io.github.jsbxyyx.server.msg.type.LoginRequestServerMsgTypeProcessor
+io.github.jsbxyyx.server.msg.type.TextServerMsgTypeProcessor
+io.github.jsbxyyx.server.msg.type.ImageServerMsgTypeProcessor

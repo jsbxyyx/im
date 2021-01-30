@@ -3,10 +3,7 @@ package io.github.jsbxyyx.pcclient.context;
 import io.github.jsbxyyx.common.Constants;
 import io.github.jsbxyyx.common.DateUtil;
 import io.github.jsbxyyx.common.IdGenerator;
-import io.github.jsbxyyx.msg.AnyMsg;
-import io.github.jsbxyyx.msg.Msg;
-import io.github.jsbxyyx.msg.MsgBody;
-import io.github.jsbxyyx.msg.TextMsg;
+import io.github.jsbxyyx.msg.*;
 import io.github.jsbxyyx.pcclient.netty.Global;
 import io.github.jsbxyyx.pcclient.netty.NettyClient;
 import io.github.jsbxyyx.pcclient.netty.NettyClientConfig;
@@ -73,15 +70,15 @@ public class ApplicationContext {
         nettyClient.sendAsync(channel, msg);
     }
 
-    public static void appendMsg(TextMsg textMsg) {
+    public static void appendMsg(AnyMsg anyMsg) {
         if (mainUI == null) {
             throw new IllegalStateException("mainUI is null");
         }
         int oldValue = ((MainUI) mainUI).getScrollValue();
-        ((MainUI) mainUI).appendMsg(textMsg);
+        ((MainUI) mainUI).appendMsg(anyMsg);
         ((MainUI) mainUI).scrollBottom(oldValue);
         mainUI.setVisible(true);
-        MSG_MAP.put(textMsg.getId(), textMsg);
+        MSG_MAP.put(anyMsg.getId(), anyMsg);
     }
 
     private static void checkNettyClient() {
@@ -132,20 +129,15 @@ public class ApplicationContext {
                     .append(" ")
                     .append(tm.getText());
             return sb.toString();
+        } else if (anyMsg instanceof ImageMsg){
+
         }
         return "";
     }
 
-    public static String getTextById(String id) {
+    public static AnyMsg getAnyMsgById(String id) {
         AnyMsg anyMsg = MSG_MAP.get(id);
-        if (anyMsg == null) {
-            return "";
-        }
-        if (anyMsg instanceof TextMsg) {
-            TextMsg tm = (TextMsg) anyMsg;
-            return tm.getText();
-        }
-        return "";
+        return anyMsg;
     }
 
     public static void removeMsg(String id) {
@@ -157,4 +149,5 @@ public class ApplicationContext {
         ((MainUI) mainUI).removeMsg(comp);
         MSG_MAP.remove(comp.getName());
     }
+
 }

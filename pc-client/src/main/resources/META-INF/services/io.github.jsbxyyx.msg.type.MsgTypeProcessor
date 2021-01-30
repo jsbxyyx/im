@@ -1,1 +1,2 @@
-io.github.jsbxyyx.pcclient.msg.type.TextMsgTypeProcessor
+io.github.jsbxyyx.pcclient.msg.type.TextClientMsgTypeProcessor
+io.github.jsbxyyx.pcclient.msg.type.ImageClientMsgTypeProcessor
