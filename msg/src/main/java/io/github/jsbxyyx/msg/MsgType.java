@@ -8,14 +8,12 @@ public class MsgType {
     public static final int Heartbeat = 0;
     public static final int LoginRequest = 1;
     public static final int LoginResponse = 2;
-    public static final int Text = 3;
-    public static final int Ok = 4;
-    public static int Error = 5;
-    public static final int Image = 6;
-    public static int Id = 7;
+    public static final int Any = 3;
+    public static int Error = 4;
+    public static int Id = 5;
 
     public static final boolean encrypt(int msgType) {
-        if (msgType == Text || msgType == Image) {
+        if (msgType == Any) {
             return true;
         }
         return false;

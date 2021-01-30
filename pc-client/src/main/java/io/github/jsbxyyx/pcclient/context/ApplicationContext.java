@@ -1,9 +1,10 @@
 package io.github.jsbxyyx.pcclient.context;
 
 import io.github.jsbxyyx.common.Constants;
-import io.github.jsbxyyx.common.DateUtil;
 import io.github.jsbxyyx.common.IdGenerator;
-import io.github.jsbxyyx.msg.*;
+import io.github.jsbxyyx.msg.AnyMsg;
+import io.github.jsbxyyx.msg.Msg;
+import io.github.jsbxyyx.msg.MsgBody;
 import io.github.jsbxyyx.pcclient.netty.Global;
 import io.github.jsbxyyx.pcclient.netty.NettyClient;
 import io.github.jsbxyyx.pcclient.netty.NettyClientConfig;
@@ -114,25 +115,6 @@ public class ApplicationContext {
         } else {
             mainUI.setTitle(mainUI.getTitle() + "......" + (status ? "在线" : "离线"));
         }
-    }
-
-    public static String getStringById(String id) {
-        AnyMsg anyMsg = MSG_MAP.get(id);
-        if (anyMsg == null) {
-            return "";
-        }
-        if (anyMsg instanceof TextMsg) {
-            TextMsg tm = (TextMsg) anyMsg;
-            StringBuilder sb = new StringBuilder(tm.getFrom())
-                    .append(" ")
-                    .append(DateUtil.format(tm.getCreateTime(), "yyyy-MM-dd HH:mm:ss"))
-                    .append(" ")
-                    .append(tm.getText());
-            return sb.toString();
-        } else if (anyMsg instanceof ImageMsg){
-
-        }
-        return "";
     }
 
     public static AnyMsg getAnyMsgById(String id) {

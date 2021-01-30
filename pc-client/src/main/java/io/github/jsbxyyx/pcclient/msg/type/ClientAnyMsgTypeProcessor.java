@@ -1,8 +1,8 @@
 package io.github.jsbxyyx.pcclient.msg.type;
 
+import io.github.jsbxyyx.msg.AnyMsg;
 import io.github.jsbxyyx.msg.Msg;
 import io.github.jsbxyyx.msg.MsgType;
-import io.github.jsbxyyx.msg.TextMsg;
 import io.github.jsbxyyx.msg.type.MsgTypeProcessor;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.netty.channel.ChannelHandlerContext;
@@ -11,16 +11,16 @@ import io.netty.channel.ChannelHandlerContext;
  * @author
  * @since
  */
-public class TextClientMsgTypeProcessor implements MsgTypeProcessor {
+public class ClientAnyMsgTypeProcessor implements MsgTypeProcessor {
 
     @Override
     public int type() {
-        return MsgType.Text;
+        return MsgType.Any;
     }
 
     @Override
     public Msg handle(ChannelHandlerContext ctx, Msg msg) {
-        TextMsg body = (TextMsg) msg.getBody();
+        AnyMsg body = (AnyMsg) msg.getBody();
         ApplicationContext.appendMsg(body);
         return null;
     }

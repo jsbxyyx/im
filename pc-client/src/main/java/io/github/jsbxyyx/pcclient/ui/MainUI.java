@@ -2,7 +2,6 @@ package io.github.jsbxyyx.pcclient.ui;
 
 import io.github.jsbxyyx.common.DateUtil;
 import io.github.jsbxyyx.common.IoUtil;
-import io.github.jsbxyyx.common.StringUtil;
 import io.github.jsbxyyx.msg.*;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.github.jsbxyyx.pcclient.netty.Global;
@@ -22,7 +21,7 @@ import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -75,8 +74,7 @@ public class MainUI extends JFrame {
                         return;
                     }
                     byte[] bytes = IoUtil.readFile(file);
-                    String image = Base64.getEncoder().encodeToString(bytes);
-                    sendImageMsg(image);
+                    sendMsg(bytes, AnyMsgType.Image);
                 }
             }
         });
@@ -88,7 +86,7 @@ public class MainUI extends JFrame {
             public void keyPressed(KeyEvent e) {
                 if (e.getSource() == input) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        sendTextMsg(input.getText());
+                        sendMsg(input.getText().getBytes(StandardCharsets.UTF_8), AnyMsgType.Text);
                     }
                 }
             }
@@ -96,42 +94,42 @@ public class MainUI extends JFrame {
         KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK);
         input.registerKeyboardAction(new CombinedAction(input.getActionForKeyStroke(ctrlV),
                 new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Transferable contents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-                if (contents == null) {
-                    return;
-                }
-                if (contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                    try {
-                        input.setText((String) contents.getTransferData(DataFlavor.stringFlavor));
-                    } catch (UnsupportedFlavorException ex) {
-                    } catch (IOException ex) {
-                    }
-                } else if (contents.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-                    try {
-                        Image image = (Image) contents.getTransferData(DataFlavor.imageFlavor);
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream(1024 * 1024);
-                        ImageIO.write((RenderedImage) image, "png", baos);
-                        sendImageMsg(Base64.getEncoder().encodeToString(baos.toByteArray()));
-                    } catch (UnsupportedFlavorException ex) {
-                    } catch (IOException ex) {
-                    }
-                } else if (contents.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                    try {
-                        List<File> fileList = (List<File>) contents.getTransferData(DataFlavor.javaFileListFlavor);
-                        if (fileList != null && !fileList.isEmpty()) {
-                            File file = fileList.get(0);
-                            if (IoUtil.checkImage(file)) {
-                                sendImageMsg(Base64.getEncoder().encodeToString(IoUtil.readFile(file)));
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Transferable contents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+                        if (contents == null) {
+                            return;
+                        }
+                        if (contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                            try {
+                                input.setText((String) contents.getTransferData(DataFlavor.stringFlavor));
+                            } catch (UnsupportedFlavorException ex) {
+                            } catch (IOException ex) {
+                            }
+                        } else if (contents.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+                            try {
+                                Image image = (Image) contents.getTransferData(DataFlavor.imageFlavor);
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream(1024 * 1024);
+                                ImageIO.write((RenderedImage) image, "png", baos);
+                                sendMsg(baos.toByteArray(), AnyMsgType.Image);
+                            } catch (UnsupportedFlavorException ex) {
+                            } catch (IOException ex) {
+                            }
+                        } else if (contents.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                            try {
+                                List<File> fileList = (List<File>) contents.getTransferData(DataFlavor.javaFileListFlavor);
+                                if (fileList != null && !fileList.isEmpty()) {
+                                    File file = fileList.get(0);
+                                    if (IoUtil.checkImage(file)) {
+                                        sendMsg(IoUtil.readFile(file), AnyMsgType.Image);
+                                    }
+                                }
+                            } catch (UnsupportedFlavorException ex) {
+                            } catch (IOException ex) {
                             }
                         }
-                    } catch (UnsupportedFlavorException ex) {
-                    } catch (IOException ex) {
                     }
-                }
-            }
-        }), ctrlV, JComponent.WHEN_FOCUSED);
+                }), ctrlV, JComponent.WHEN_FOCUSED);
         add(input);
 
         send = new JButton("发送");
@@ -139,7 +137,7 @@ public class MainUI extends JFrame {
         send.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                sendTextMsg(input.getText());
+                sendMsg(input.getText().getBytes(StandardCharsets.UTF_8), AnyMsgType.Text);
             }
         });
         add(send);
@@ -154,10 +152,10 @@ public class MainUI extends JFrame {
         StringBuilder builder = new StringBuilder();
 
         Object content = null;
-        if (anyMsg instanceof TextMsg) {
-            content = ((TextMsg) anyMsg).getText();
-        } else if (anyMsg instanceof ImageMsg) {
-            content = Base64.getDecoder().decode(((ImageMsg) anyMsg).getImage());
+        if (anyMsg.getType() == AnyMsgType.Text) {
+            content = anyMsg.getText();
+        } else if (anyMsg.getType() == AnyMsgType.Image) {
+            content = anyMsg.getImage();
         } else {
             content = "不支持的消息类型";
         }
@@ -173,7 +171,7 @@ public class MainUI extends JFrame {
                 .append("</p>")
                 .append("</html>");
 
-        if (anyMsg instanceof ImageMsg) {
+        if (anyMsg.getType() == AnyMsgType.Image) {
             ImagePanel imagePanel = new ImagePanel(builder.toString(), (byte[]) content, new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent me) {
@@ -187,7 +185,7 @@ public class MainUI extends JFrame {
                                 ImagePanel a = (ImagePanel) me.getSource();
                                 String id = a.getName();
                                 AnyMsg am = ApplicationContext.getAnyMsgById(id);
-                                byte[] image = Base64.getDecoder().decode(((ImageMsg) am).getImage());
+                                byte[] image = am.getContent();
                                 new ImageView(image);
                                 pm.setVisible(false);
                             }
@@ -200,7 +198,7 @@ public class MainUI extends JFrame {
                                 ImagePanel a = (ImagePanel) me.getSource();
                                 String id = a.getName();
                                 AnyMsg am = ApplicationContext.getAnyMsgById(id);
-                                byte[] image = Base64.getDecoder().decode(((ImageMsg) am).getImage());
+                                byte[] image = am.getContent();
                                 Toolkit.getDefaultToolkit().getSystemClipboard()
                                         .setContents(new ImageTransferable(image), null);
                                 pm.setVisible(false);
@@ -241,8 +239,9 @@ public class MainUI extends JFrame {
                             JLabel a = (JLabel) me.getSource();
                             String id = a.getName();
                             AnyMsg am = ApplicationContext.getAnyMsgById(id);
-                            Transferable trans = new StringSelection(((TextMsg) am).getText());
-                            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
+                            Transferable trans = new StringSelection(am.getText());
+                            Toolkit.getDefaultToolkit().getSystemClipboard()
+                                    .setContents(trans, null);
                             pm.setVisible(false);
                         }
                     });
@@ -275,34 +274,20 @@ public class MainUI extends JFrame {
         sp_pane.updateUI();
     }
 
-    private void sendTextMsg(String text) {
-        if (!StringUtil.isBlank(text)) {
-            TextMsg textMsg = new TextMsg();
-            textMsg.setCreateTime(new Date());
-            textMsg.setFrom(Global.getUsername());
-            textMsg.setTo(Global.getGroup());
-            textMsg.setToType(TextMsgToType.TO_TYPE_GROUP);
-            textMsg.setText(text);
-            Msg resultMsg = ApplicationContext.sendSync(textMsg);
+    private void sendMsg(byte[] content, int anyMsgType) {
+        if (content != null && content.length > 0) {
+            AnyMsg anyMsg = new AnyMsg();
+            anyMsg.setCreateTime(new Date());
+            anyMsg.setFrom(Global.getUsername());
+            anyMsg.setTo(Global.getGroup());
+            anyMsg.setToType(TextMsgToType.TO_TYPE_GROUP);
+            anyMsg.setContent(content);
+            anyMsg.setType(anyMsgType);
+            Msg resultMsg = ApplicationContext.sendSync(anyMsg);
             IdMsg idMsg = (IdMsg) resultMsg.getBody();
-            textMsg.setId(idMsg.getId());
-            ApplicationContext.appendMsg(textMsg);
+            anyMsg.setId(idMsg.getId());
+            ApplicationContext.appendMsg(anyMsg);
             input.setText("");
-        }
-    }
-
-    private void sendImageMsg(String image) {
-        if (!StringUtil.isBlank(image)) {
-            ImageMsg imageMsg = new ImageMsg();
-            imageMsg.setCreateTime(new Date());
-            imageMsg.setFrom(Global.getUsername());
-            imageMsg.setTo(Global.getGroup());
-            imageMsg.setToType(TextMsgToType.TO_TYPE_GROUP);
-            imageMsg.setImage(image);
-            Msg resultMsg = ApplicationContext.sendSync(imageMsg);
-            IdMsg idMsg = (IdMsg) resultMsg.getBody();
-            imageMsg.setId(idMsg.getId());
-            ApplicationContext.appendMsg(imageMsg);
         }
     }
 
