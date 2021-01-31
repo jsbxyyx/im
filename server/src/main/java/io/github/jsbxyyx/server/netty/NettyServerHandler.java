@@ -27,7 +27,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Msg> {
             }
         }
         if (rsp == null) {
-            return ;
+            return;
         }
         ctx.writeAndFlush(rsp);
     }

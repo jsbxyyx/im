@@ -2,12 +2,14 @@ package io.github.jsbxyyx.msg;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author
  * @since
  */
-public class AnyMsg implements MsgBody {
+public class AnyMsg implements MsgBody, Delayed {
 
     private String id; // id
     private String from; // 来自谁
@@ -103,5 +105,16 @@ public class AnyMsg implements MsgBody {
             return content;
         }
         throw new IllegalArgumentException("type : " + type + " is invalid");
+    }
+
+    @Override
+    public long getDelay(TimeUnit unit) {
+        long remaining = (createTime.getTime() + 3 * 60 * 1000L) - System.currentTimeMillis();
+        return unit.convert(remaining, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public int compareTo(Delayed o) {
+        return (int) (getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
     }
 }

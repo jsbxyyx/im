@@ -11,12 +11,15 @@ import io.github.jsbxyyx.pcclient.netty.NettyClientConfig;
 import io.github.jsbxyyx.pcclient.service.ConfigService;
 import io.github.jsbxyyx.pcclient.ui.MainUI;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.DelayQueue;
 
 /**
  * @author
@@ -24,14 +27,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ApplicationContext {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationContext.class);
+
     private static NettyClient nettyClient;
     private static Channel channel;
     private static JFrame mainUI;
 
     private static final Map<String, AnyMsg> MSG_MAP = new ConcurrentHashMap<>();
 
+    private static final DelayQueue<AnyMsg> DELAY_MSG_QUEUE = new DelayQueue<>();
+
     public static void init() {
         ConfigService.init();
+        startConsumerDelayMsg();
     }
 
     public static void setNettyClient(NettyClient nc) {
@@ -80,6 +88,7 @@ public class ApplicationContext {
         ((MainUI) mainUI).scrollBottom(oldValue);
         mainUI.setVisible(true);
         MSG_MAP.put(anyMsg.getId(), anyMsg);
+        DELAY_MSG_QUEUE.offer(anyMsg);
     }
 
     private static void checkNettyClient() {
@@ -130,6 +139,34 @@ public class ApplicationContext {
     public static void removeMsg(JComponent comp) {
         ((MainUI) mainUI).removeMsg(comp);
         MSG_MAP.remove(comp.getName());
+    }
+
+    public static void startConsumerDelayMsg() {
+        new Thread(new DelayMsgQueueConsumer(DELAY_MSG_QUEUE)).start();
+        LOGGER.info("start consumer delay msg.");
+    }
+
+    static class DelayMsgQueueConsumer implements Runnable {
+
+        private final DelayQueue<AnyMsg> delayQueue;
+
+        DelayMsgQueueConsumer(DelayQueue<AnyMsg> delayQueue) {
+            this.delayQueue = delayQueue;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    // 从延迟队列的头部获取已经过期的消息
+                    // 如果暂时没有过期消息或者队列为空，则take()方法会被阻塞，直到有过期的消息为止
+                    AnyMsg anyMsg = delayQueue.take();
+                    removeMsg(anyMsg.getId());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 }

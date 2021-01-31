@@ -15,7 +15,6 @@ public class ImageView extends JDialog {
         image = new JLabel(new ImageIcon(imageBytes));
         add(image);
         pack();
-        setResizable(false);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);

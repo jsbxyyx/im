@@ -17,7 +17,7 @@ import io.netty.channel.ChannelHandlerContext;
  * @author
  * @since
  */
-public class LoginRequestServerMsgTypeProcessor implements MsgTypeProcessor {
+public class ServerLoginRequestMsgTypeProcessor implements MsgTypeProcessor {
 
     @Override
     public int type() {
@@ -46,7 +46,6 @@ public class LoginRequestServerMsgTypeProcessor implements MsgTypeProcessor {
 
         return Msg.build(msg.getId(), msg.getType(), msg.getHeadMap(), rmsg);
     }
-
 
 
 }

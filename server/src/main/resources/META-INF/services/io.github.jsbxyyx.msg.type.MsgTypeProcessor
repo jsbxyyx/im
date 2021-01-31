@@ -1,2 +1,2 @@
-io.github.jsbxyyx.server.msg.type.LoginRequestServerMsgTypeProcessor
+io.github.jsbxyyx.server.msg.type.ServerLoginRequestMsgTypeProcessor
 io.github.jsbxyyx.server.msg.type.ServerAnyMsgTypeProcessor

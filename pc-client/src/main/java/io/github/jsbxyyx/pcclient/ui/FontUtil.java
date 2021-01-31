@@ -33,7 +33,6 @@ public class FontUtil {
             Object key = keys.nextElement();
             Object value = UIManager.get(key);
             if(value instanceof FontUIResource) {
-                LOGGER.info("font : {}", value);
                 UIManager.put(key, fontResource);
             }
         }

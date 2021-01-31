@@ -2,7 +2,12 @@ package io.github.jsbxyyx.server.msg.type;
 
 import io.github.jsbxyyx.common.IdGenerator;
 import io.github.jsbxyyx.common.StringUtil;
-import io.github.jsbxyyx.msg.*;
+import io.github.jsbxyyx.msg.AnyMsg;
+import io.github.jsbxyyx.msg.ErrorCode;
+import io.github.jsbxyyx.msg.IdMsg;
+import io.github.jsbxyyx.msg.Msg;
+import io.github.jsbxyyx.msg.MsgType;
+import io.github.jsbxyyx.msg.TextMsgToType;
 import io.github.jsbxyyx.msg.type.MsgTypeProcessor;
 import io.github.jsbxyyx.server.exception.BasicException;
 import io.github.jsbxyyx.server.netty.Global;

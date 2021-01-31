@@ -93,7 +93,7 @@ public class NettyServer {
                         if (nettyServerConfig.isLog()) {
                             ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
                         }
-                        ch.pipeline().addLast(new IdleStateHandler(60,20, 0, TimeUnit.SECONDS))
+                        ch.pipeline().addLast(new IdleStateHandler(60, 20, 0, TimeUnit.SECONDS))
                                 .addLast(new HeartbeatHandler())
                                 .addLast(new NettyMessageEncoder())
                                 .addLast(new NettyMessageDecoder());

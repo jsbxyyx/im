@@ -34,9 +34,9 @@ public class MsgFuture {
         }
 
         if (result instanceof RuntimeException) {
-            throw (RuntimeException)result;
+            throw (RuntimeException) result;
         } else if (result instanceof Throwable) {
-            throw new RuntimeException((Throwable)result);
+            throw new RuntimeException((Throwable) result);
         }
 
         return result;

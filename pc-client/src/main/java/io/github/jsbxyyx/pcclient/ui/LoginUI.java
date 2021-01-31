@@ -45,7 +45,7 @@ public class LoginUI extends JFrame implements ActionListener {
             }
         });
 
-        setLayout(new FlowLayout());
+        setLayout(new GridLayout(3, 2));
 
         add(new JLabel("用户名"));
         tfUsername = new JTextField(20);

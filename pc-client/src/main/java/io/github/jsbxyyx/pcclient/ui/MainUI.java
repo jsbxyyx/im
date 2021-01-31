@@ -2,7 +2,11 @@ package io.github.jsbxyyx.pcclient.ui;
 
 import io.github.jsbxyyx.common.DateUtil;
 import io.github.jsbxyyx.common.IoUtil;
-import io.github.jsbxyyx.msg.*;
+import io.github.jsbxyyx.msg.AnyMsg;
+import io.github.jsbxyyx.msg.AnyMsgType;
+import io.github.jsbxyyx.msg.IdMsg;
+import io.github.jsbxyyx.msg.Msg;
+import io.github.jsbxyyx.msg.TextMsgToType;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.github.jsbxyyx.pcclient.netty.Global;
 import org.slf4j.Logger;
@@ -16,12 +20,20 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -36,13 +48,15 @@ public class MainUI extends JFrame {
 
     private JPanel msgArea;
     private JScrollPane sp_pane;
+    private JButton face;
     private JButton image;
     private JTextField input;
     private JButton send;
+    private FaceDialog fd;
 
     public MainUI() {
         setTitle(Global.getGroupName() + " - " + Global.getUsername());
-        setSize(600, 400);
+        setSize(600, 430);
         setLayout(new FlowLayout());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -59,6 +73,27 @@ public class MainUI extends JFrame {
         sp_pane.setPreferredSize(new Dimension(580, 300));
         sp_pane.setViewportView(msgArea);
         getContentPane().add(sp_pane);
+
+        JPanel panel2 = new JPanel();
+        panel2.setPreferredSize(new Dimension(580, 35));
+        add(panel2);
+
+        face = new JButton("表情");
+        face.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (fd == null) {
+                    fd = new FaceDialog(new ClickCallback() {
+                        @Override
+                        public void callback(String str) {
+                            sendMsg(Base64.getDecoder().decode(str), AnyMsgType.Image);
+                        }
+                    });
+                }
+                fd.setVisible(true);
+            }
+        });
+        panel2.add(face);
 
         image = new JButton("图片");
         image.addActionListener(new ActionListener() {
@@ -78,9 +113,13 @@ public class MainUI extends JFrame {
                 }
             }
         });
-        add(image);
+        panel2.add(image);
 
-        input = new JTextField(40);
+        JPanel panel3= new JPanel();
+        panel3.setPreferredSize(new Dimension(580, 60));
+        add(panel3);
+
+        input = new JTextField(50);
         input.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -130,7 +169,7 @@ public class MainUI extends JFrame {
                         }
                     }
                 }), ctrlV, JComponent.WHEN_FOCUSED);
-        add(input);
+        panel3.add(input);
 
         send = new JButton("发送");
         send.setActionCommand("SEND");
@@ -140,7 +179,7 @@ public class MainUI extends JFrame {
                 sendMsg(input.getText().getBytes(StandardCharsets.UTF_8), AnyMsgType.Text);
             }
         });
-        add(send);
+        panel3.add(send);
     }
 
     public void launch() {
@@ -268,8 +307,6 @@ public class MainUI extends JFrame {
 
     public void scrollBottom(int oldValue) {
         int maxHeight = sp_pane.getVerticalScrollBar().getMaximum();
-//        System.out.println(String.format("oldValue : %s, newvalue : %s, result : %s",
-//                oldValue, maxHeight, maxHeight - oldValue));
         sp_pane.getViewport().setViewPosition(new Point(0, Integer.MAX_VALUE));
         sp_pane.updateUI();
     }
