@@ -109,7 +109,7 @@ public class AnyMsg implements MsgBody, Delayed {
 
     @Override
     public long getDelay(TimeUnit unit) {
-        long remaining = (createTime.getTime() + 3 * 60 * 1000L) - System.currentTimeMillis();
+        long remaining = (createTime.getTime() + 1 * 60 * 1000L) - System.currentTimeMillis();
         return unit.convert(remaining, TimeUnit.MILLISECONDS);
     }
 
