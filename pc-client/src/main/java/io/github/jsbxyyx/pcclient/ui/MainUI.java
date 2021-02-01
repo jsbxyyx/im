@@ -119,7 +119,7 @@ public class MainUI extends JFrame {
         panel3.setPreferredSize(new Dimension(580, 60));
         add(panel3);
 
-        input = new JTextField(50);
+        input = new JTextField(40);
         input.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
