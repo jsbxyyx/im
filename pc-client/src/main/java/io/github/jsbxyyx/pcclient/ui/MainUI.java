@@ -58,14 +58,6 @@ public class MainUI extends JFrame {
         setTitle(Global.getGroupName() + " - " + Global.getUsername());
         setSize(600, 430);
         setLayout(new FlowLayout());
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                LOGGER.warn("main ui closed...");
-                ApplicationContext.shutdown();
-            }
-        });
 
         msgArea = new JPanel();
         msgArea.setLayout(new BoxLayout(msgArea, BoxLayout.Y_AXIS));
@@ -180,6 +172,8 @@ public class MainUI extends JFrame {
             }
         });
         panel3.add(send);
+
+        addSystemTray();
     }
 
     public void launch() {
@@ -342,5 +336,45 @@ public class MainUI extends JFrame {
     public void removeMsg(JComponent comp) {
         msgArea.remove(comp);
         msgArea.updateUI();
+    }
+
+    private void addSystemTray() {
+        if (SystemTray.isSupported()) {
+            PopupMenu m = new PopupMenu();
+            MenuItem exit = new MenuItem("exit");
+            exit.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ApplicationContext.shutdown();
+                    System.exit(0);
+                }
+            });
+            m.add(exit);
+
+            Image imageIcon = Toolkit.getDefaultToolkit().getImage(FontUtil.getResource("icon.png"));
+            TrayIcon trayIcon = new TrayIcon(imageIcon, "TT聊天", m);
+            trayIcon.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setVisible(true);
+                }
+            });
+
+            try {
+                SystemTray.getSystemTray().add(trayIcon);
+            } catch (AWTException e) {
+                e.printStackTrace();
+            }
+        } else {
+            LOGGER.warn("not support system tray.");
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    LOGGER.warn("main ui closed...");
+                    ApplicationContext.shutdown();
+                }
+            });
+        }
     }
 }

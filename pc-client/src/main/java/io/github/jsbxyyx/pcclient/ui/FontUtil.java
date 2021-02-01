@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import java.awt.*;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Enumeration;
 
 /**
@@ -36,6 +37,10 @@ public class FontUtil {
                 UIManager.put(key, fontResource);
             }
         }
+    }
+
+    public static URL getResource(String name){
+        return FontUtil.class.getClassLoader().getResource(name);
     }
 
 }
