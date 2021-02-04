@@ -3,11 +3,11 @@ package io.github.jsbxyyx.server.msg.type;
 import io.github.jsbxyyx.common.IdGenerator;
 import io.github.jsbxyyx.common.StringUtil;
 import io.github.jsbxyyx.msg.AnyMsg;
+import io.github.jsbxyyx.msg.AnyMsgToType;
 import io.github.jsbxyyx.msg.ErrorCode;
 import io.github.jsbxyyx.msg.IdMsg;
 import io.github.jsbxyyx.msg.Msg;
 import io.github.jsbxyyx.msg.MsgType;
-import io.github.jsbxyyx.msg.TextMsgToType;
 import io.github.jsbxyyx.msg.type.MsgTypeProcessor;
 import io.github.jsbxyyx.server.exception.BasicException;
 import io.github.jsbxyyx.server.netty.Global;
@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -48,12 +48,12 @@ public class ServerAnyMsgTypeProcessor implements MsgTypeProcessor {
         byte[] content = anyMsg.getContent();
         int type = anyMsg.getType();
 
-        if (!Objects.equals(toType, TextMsgToType.TO_TYPE_GROUP)) {
+        if (!Objects.equals(toType, AnyMsgToType.TO_TYPE_GROUP)) {
             throw new BasicException(ErrorCode.USER_TYPE_NOT_SUPPORT);
         }
 
-        List<User> userList = UserService.getUserListByGroup(to);
-        for (User user : userList) {
+        Set<User> userSet = UserService.getOnlineUserByGroup(to);
+        for (User user : userSet) {
             if (Objects.equals(user.getUsername(), from)) {
                 continue;
             }

@@ -1,5 +1,7 @@
 package io.github.jsbxyyx.server.service;
 
+import java.util.Objects;
+
 /**
  * @author
  * @since
@@ -41,5 +43,18 @@ public class User {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(username, user.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username);
     }
 }

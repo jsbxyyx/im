@@ -20,6 +20,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -28,7 +29,12 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.security.KeyStore;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -69,6 +75,10 @@ public class NettyClient {
                     @Override
                     public void initChannel(SocketChannel ch) {
                         ChannelPipeline pipeline = ch.pipeline();
+                        InputStream jksIn = getClass().getResourceAsStream("/clientStore.jks");
+                        SSLEngine engine = initSSLContext(jksIn, "tttttt").createSSLEngine();//创建SSLEngine
+                        engine.setUseClientMode(true);
+                        ch.pipeline().addLast("tls", new SslHandler(engine));
                         pipeline.addLast(
                                 new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
                                         nettyClientConfig.getChannelMaxWriteIdleSeconds(),
@@ -79,7 +89,6 @@ public class NettyClient {
                     }
                 });
     }
-
 
     public Channel getNewChannel(InetSocketAddress address) {
         Channel channel;
@@ -212,6 +221,22 @@ public class NettyClient {
         public void close(ChannelHandlerContext ctx, ChannelPromise future) throws Exception {
             super.close(ctx, future);
         }
+    }
+
+    private SSLContext initSSLContext(InputStream jksIn, String password) {
+        try {
+            KeyStore ks = KeyStore.getInstance("JKS");
+            char[] chars = password.toCharArray();
+            ks.load(jksIn, chars);
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(ks);
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            return sslContext;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 }

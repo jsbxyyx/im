@@ -1,6 +1,7 @@
 package io.github.jsbxyyx.server.netty;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,6 +33,15 @@ public class Global {
 
     public static String getChannelId(String username) {
         return USER_CHANNEL_ID_MAP.get(username);
+    }
+
+    public static String getUsername(String channelId) {
+        for (Map.Entry<String, String> entry : USER_CHANNEL_ID_MAP.entrySet()) {
+            if (Objects.equals(entry.getValue(), channelId)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
 }

@@ -14,10 +14,10 @@ public class AnyMsg implements MsgBody, Delayed {
     private String id; // id
     private String from; // 来自谁
     private String to; // 发给谁
-    private String toType; // to的类型 1：组
+    private String toType; // to的类型 @see AnyMsgToType
     private Date createTime; // 创建时间
     private byte[] content; // 内容
-    private int type; // 1文本 2图片 3文件
+    private int type; // 消息类型 @see AnyMsgType
 
     public AnyMsg() {
     }
@@ -116,5 +116,9 @@ public class AnyMsg implements MsgBody, Delayed {
     @Override
     public int compareTo(Delayed o) {
         return (int) (getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
+    }
+
+    public String getStringContent() {
+        return new String(content, StandardCharsets.UTF_8);
     }
 }

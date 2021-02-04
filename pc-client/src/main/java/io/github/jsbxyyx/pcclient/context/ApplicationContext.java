@@ -3,6 +3,7 @@ package io.github.jsbxyyx.pcclient.context;
 import io.github.jsbxyyx.common.Constants;
 import io.github.jsbxyyx.common.IdGenerator;
 import io.github.jsbxyyx.msg.AnyMsg;
+import io.github.jsbxyyx.msg.AnyMsgType;
 import io.github.jsbxyyx.msg.Msg;
 import io.github.jsbxyyx.msg.MsgBody;
 import io.github.jsbxyyx.pcclient.netty.Global;
@@ -87,8 +88,10 @@ public class ApplicationContext {
         ((MainUI) mainUI).appendMsg(anyMsg);
         ((MainUI) mainUI).scrollBottom(oldValue);
         mainUI.setVisible(true);
-        MSG_MAP.put(anyMsg.getId(), anyMsg);
-        DELAY_MSG_QUEUE.offer(anyMsg);
+        if (anyMsg.getMsgType() < AnyMsgType.Online) {
+            MSG_MAP.put(anyMsg.getId(), anyMsg);
+            DELAY_MSG_QUEUE.offer(anyMsg);
+        }
     }
 
     private static void checkNettyClient() {

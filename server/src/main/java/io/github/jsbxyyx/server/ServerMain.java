@@ -1,5 +1,6 @@
 package io.github.jsbxyyx.server;
 
+import io.github.jsbxyyx.server.handler.OfflineHandler;
 import io.github.jsbxyyx.server.netty.NettyServer;
 import io.github.jsbxyyx.server.netty.NettyServerConfig;
 import io.github.jsbxyyx.server.service.UserService;
@@ -13,7 +14,7 @@ public class ServerMain {
         UserService.init();
 
         NettyServerConfig config = new NettyServerConfig();
-        NettyServer server = new NettyServer(config);
+        NettyServer server = new NettyServer(config, new OfflineHandler());
         server.start();
     }
 

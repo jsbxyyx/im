@@ -3,10 +3,10 @@ package io.github.jsbxyyx.pcclient.ui;
 import io.github.jsbxyyx.common.DateUtil;
 import io.github.jsbxyyx.common.IoUtil;
 import io.github.jsbxyyx.msg.AnyMsg;
+import io.github.jsbxyyx.msg.AnyMsgToType;
 import io.github.jsbxyyx.msg.AnyMsgType;
 import io.github.jsbxyyx.msg.IdMsg;
 import io.github.jsbxyyx.msg.Msg;
-import io.github.jsbxyyx.msg.TextMsgToType;
 import io.github.jsbxyyx.pcclient.context.ApplicationContext;
 import io.github.jsbxyyx.pcclient.netty.Global;
 import org.slf4j.Logger;
@@ -46,8 +46,9 @@ public class MainUI extends JFrame {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainUI.class);
 
+    private JPanel friendArea;
     private JPanel msgArea;
-    private JScrollPane sp_pane;
+    private JScrollPane msg_sp;
     private JButton face;
     private JButton image;
     private JTextField input;
@@ -56,19 +57,28 @@ public class MainUI extends JFrame {
 
     public MainUI() {
         setTitle(Global.getGroupName() + " - " + Global.getUsername());
-        setSize(600, 430);
-        setLayout(new FlowLayout());
+        setSize(750, 430);
+        setLayout(new BorderLayout());
+
+        friendArea = new JPanel();
+        JScrollPane left_sp = new JScrollPane();
+        left_sp.setPreferredSize(new Dimension(100, 400));
+        left_sp.setViewportView(friendArea);
+        add(left_sp, BorderLayout.WEST);
+
+        JPanel center = new JPanel();
+        add(center, BorderLayout.CENTER);
 
         msgArea = new JPanel();
         msgArea.setLayout(new BoxLayout(msgArea, BoxLayout.Y_AXIS));
-        sp_pane = new JScrollPane();
-        sp_pane.setPreferredSize(new Dimension(580, 300));
-        sp_pane.setViewportView(msgArea);
-        getContentPane().add(sp_pane);
+        msg_sp = new JScrollPane();
+        msg_sp.setPreferredSize(new Dimension(580, 300));
+        msg_sp.setViewportView(msgArea);
+        center.add(msg_sp);
 
         JPanel panel2 = new JPanel();
         panel2.setPreferredSize(new Dimension(580, 35));
-        add(panel2);
+        center.add(panel2);
 
         face = new JButton("表情");
         face.addActionListener(new ActionListener() {
@@ -107,9 +117,9 @@ public class MainUI extends JFrame {
         });
         panel2.add(image);
 
-        JPanel panel3= new JPanel();
+        JPanel panel3 = new JPanel();
         panel3.setPreferredSize(new Dimension(580, 60));
-        add(panel3);
+        center.add(panel3);
 
         input = new JTextField(40);
         input.addKeyListener(new KeyAdapter() {
@@ -182,58 +192,101 @@ public class MainUI extends JFrame {
     }
 
     public void appendMsg(AnyMsg anyMsg) {
-        StringBuilder builder = new StringBuilder();
 
-        Object content = null;
-        if (anyMsg.getType() == AnyMsgType.Text) {
-            content = anyMsg.getText();
-        } else if (anyMsg.getType() == AnyMsgType.Image) {
-            content = anyMsg.getImage();
-        } else {
-            content = "不支持的消息类型";
-        }
+        if (anyMsg.getMsgType() < AnyMsgType.Online) {
+            StringBuilder builder = new StringBuilder();
 
-        builder.append("<html>")
-                .append("<p>")
-                .append(anyMsg.getFrom())
-                .append("&nbsp;&nbsp;&nbsp;&nbsp;")
-                .append(DateUtil.format(anyMsg.getCreateTime(), "yyyy-MM-dd HH:mm:ss"))
-                .append("</p>")
-                .append("<p>")
-                .append(content instanceof String ? content : "")
-                .append("</p>")
-                .append("</html>");
+            Object content = null;
+            if (anyMsg.getType() == AnyMsgType.Text) {
+                content = anyMsg.getText();
+            } else if (anyMsg.getType() == AnyMsgType.Image) {
+                content = anyMsg.getImage();
+            } else {
+                content = "不支持的消息类型";
+            }
 
-        if (anyMsg.getType() == AnyMsgType.Image) {
-            ImagePanel imagePanel = new ImagePanel(builder.toString(), (byte[]) content, new MouseAdapter() {
+            builder.append("<html>")
+                    .append("<p>")
+                    .append(anyMsg.getFrom())
+                    .append("&nbsp;&nbsp;&nbsp;&nbsp;")
+                    .append(DateUtil.format(anyMsg.getCreateTime(), "yyyy-MM-dd HH:mm:ss"))
+                    .append("</p>")
+                    .append("<p>")
+                    .append(content instanceof String ? content : "")
+                    .append("</p>")
+                    .append("</html>");
+
+            if (anyMsg.getType() == AnyMsgType.Image) {
+                ImagePanel imagePanel = new ImagePanel(builder.toString(), (byte[]) content, new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent me) {
+                        if (me.getButton() == MouseEvent.BUTTON3) {
+                            JPopupMenu pm = new JPopupMenu();
+                            JMenuItem view, copy, del;
+                            view = new JMenuItem("查看大图");
+                            view.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    ImagePanel a = (ImagePanel) me.getSource();
+                                    String id = a.getName();
+                                    AnyMsg am = ApplicationContext.getAnyMsgById(id);
+                                    byte[] image = am.getContent();
+                                    new ImageView(image);
+                                    pm.setVisible(false);
+                                }
+                            });
+                            pm.add(view);
+                            copy = new JMenuItem("复制内容");
+                            copy.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    ImagePanel a = (ImagePanel) me.getSource();
+                                    String id = a.getName();
+                                    AnyMsg am = ApplicationContext.getAnyMsgById(id);
+                                    byte[] image = am.getContent();
+                                    Toolkit.getDefaultToolkit().getSystemClipboard()
+                                            .setContents(new ImageTransferable(image), null);
+                                    pm.setVisible(false);
+                                }
+                            });
+                            pm.add(copy);
+                            del = new JMenuItem("删除");
+                            del.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    JComponent comp = (JComponent) me.getSource();
+                                    ApplicationContext.removeMsg(comp);
+                                }
+                            });
+                            pm.add(del);
+                            pm.show((Component) me.getSource(), me.getX(), me.getY());
+                        }
+                    }
+                });
+                imagePanel.setName(anyMsg.getId());
+                msgArea.add(imagePanel);
+                return;
+            }
+
+            JLabel label = new JLabel();
+            label.setName(anyMsg.getId());
+            label.setText(builder.toString());
+            label.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent me) {
                     if (me.getButton() == MouseEvent.BUTTON3) {
                         JPopupMenu pm = new JPopupMenu();
-                        JMenuItem view, copy, del;
-                        view = new JMenuItem("查看大图");
-                        view.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                ImagePanel a = (ImagePanel) me.getSource();
-                                String id = a.getName();
-                                AnyMsg am = ApplicationContext.getAnyMsgById(id);
-                                byte[] image = am.getContent();
-                                new ImageView(image);
-                                pm.setVisible(false);
-                            }
-                        });
-                        pm.add(view);
+                        JMenuItem copy, del;
                         copy = new JMenuItem("复制内容");
                         copy.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                ImagePanel a = (ImagePanel) me.getSource();
+                                JLabel a = (JLabel) me.getSource();
                                 String id = a.getName();
                                 AnyMsg am = ApplicationContext.getAnyMsgById(id);
-                                byte[] image = am.getContent();
+                                Transferable trans = new StringSelection(am.getText());
                                 Toolkit.getDefaultToolkit().getSystemClipboard()
-                                        .setContents(new ImageTransferable(image), null);
+                                        .setContents(trans, null);
                                 pm.setVisible(false);
                             }
                         });
@@ -251,58 +304,25 @@ public class MainUI extends JFrame {
                     }
                 }
             });
-            imagePanel.setName(anyMsg.getId());
-            msgArea.add(imagePanel);
+            msgArea.add(label);
             return;
         }
+        if (anyMsg.getMsgType() == AnyMsgType.Online) {
+            friendArea.removeAll();
 
-        JLabel label = new JLabel();
-        label.setName(anyMsg.getId());
-        label.setText(builder.toString());
-        label.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent me) {
-                if (me.getButton() == MouseEvent.BUTTON3) {
-                    JPopupMenu pm = new JPopupMenu();
-                    JMenuItem copy, del;
-                    copy = new JMenuItem("复制内容");
-                    copy.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            JLabel a = (JLabel) me.getSource();
-                            String id = a.getName();
-                            AnyMsg am = ApplicationContext.getAnyMsgById(id);
-                            Transferable trans = new StringSelection(am.getText());
-                            Toolkit.getDefaultToolkit().getSystemClipboard()
-                                    .setContents(trans, null);
-                            pm.setVisible(false);
-                        }
-                    });
-                    pm.add(copy);
-                    del = new JMenuItem("删除");
-                    del.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            JComponent comp = (JComponent) me.getSource();
-                            ApplicationContext.removeMsg(comp);
-                        }
-                    });
-                    pm.add(del);
-                    pm.show((Component) me.getSource(), me.getX(), me.getY());
-                }
-            }
-        });
-        msgArea.add(label);
+            friendArea.updateUI();
+            return;
+        }
     }
 
     public int getScrollValue() {
-        return sp_pane.getVerticalScrollBar().getMaximum();
+        return msg_sp.getVerticalScrollBar().getMaximum();
     }
 
     public void scrollBottom(int oldValue) {
-        int maxHeight = sp_pane.getVerticalScrollBar().getMaximum();
-        sp_pane.getViewport().setViewPosition(new Point(0, Integer.MAX_VALUE));
-        sp_pane.updateUI();
+        int maxHeight = msg_sp.getVerticalScrollBar().getMaximum();
+        msg_sp.getViewport().setViewPosition(new Point(0, Integer.MAX_VALUE));
+        msg_sp.updateUI();
     }
 
     private void sendMsg(byte[] content, int anyMsgType) {
@@ -311,7 +331,7 @@ public class MainUI extends JFrame {
             anyMsg.setCreateTime(new Date());
             anyMsg.setFrom(Global.getUsername());
             anyMsg.setTo(Global.getGroup());
-            anyMsg.setToType(TextMsgToType.TO_TYPE_GROUP);
+            anyMsg.setToType(AnyMsgToType.TO_TYPE_GROUP);
             anyMsg.setContent(content);
             anyMsg.setType(anyMsgType);
             Msg resultMsg = ApplicationContext.sendSync(anyMsg);

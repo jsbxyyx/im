@@ -8,12 +8,12 @@ import io.github.jsbxyyx.server.exception.BasicException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author
@@ -26,7 +26,7 @@ public class UserService {
     /**
      * key: group value: [user]
      */
-    public static Map<String, List<User>> GROUP_MAP;
+    public static Map<String, Set<User>> GROUP_MAP = new ConcurrentHashMap<>();
 
     public static void init() {
         InputStream in = null;
@@ -36,20 +36,6 @@ public class UserService {
                     new TypeToken<Map<String, User>>() {
                     }.getType());
             USER_MAP = Collections.unmodifiableMap(o);
-
-            Map<String, List<User>> map = new HashMap<>();
-            for (Map.Entry<String, User> entry : o.entrySet()) {
-                User value = entry.getValue();
-                String group = value.getGroup();
-                if (map.containsKey(group)) {
-                    map.get(group).add(value);
-                } else {
-                    List<User> list = new ArrayList<>();
-                    list.add(value);
-                    map.put(group, list);
-                }
-            }
-            GROUP_MAP = Collections.unmodifiableMap(map);
         } finally {
             try {
                 in.close();
@@ -69,7 +55,22 @@ public class UserService {
         return user;
     }
 
-    public static List<User> getUserListByGroup(String group) {
-        return Collections.unmodifiableList(GROUP_MAP.get(group));
+    public static Set<User> getOnlineUserByGroup(String group) {
+        return Collections.unmodifiableSet(GROUP_MAP.get(group));
+    }
+
+    public static void online(String group, User findUser) {
+        GROUP_MAP.putIfAbsent(group, new HashSet<>());
+        GROUP_MAP.get(group).add(findUser);
+    }
+
+    public static void offline(String username) {
+        User user = USER_MAP.get(username);
+        if (user != null) {
+            Set<User> users = GROUP_MAP.get(user.getGroup());
+            if (users != null) {
+                users.remove(user);
+            }
+        }
     }
 }

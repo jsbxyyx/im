@@ -3,6 +3,7 @@ package io.github.jsbxyyx.server.netty;
 import io.github.jsbxyyx.common.ThreadFactoryImpl;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -15,12 +16,18 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.security.KeyStore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -42,9 +49,12 @@ public class NettyServer {
     private int listenPort;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    public NettyServer(final NettyServerConfig nettyServerConfig) {
+    private final ChannelHandler[] channelHandlers;
+
+    public NettyServer(final NettyServerConfig nettyServerConfig, ChannelHandler... channelHandlers) {
         this.serverBootstrap = new ServerBootstrap();
         this.nettyServerConfig = nettyServerConfig;
+        this.channelHandlers = channelHandlers;
         this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nettyServerConfig.getServerWorkerThreads(),
                 new ThreadFactoryImpl(nettyServerConfig.getBizThreadPrefix()));
 
@@ -90,12 +100,19 @@ public class NettyServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) {
+                        InputStream jksIn = getClass().getResourceAsStream("/serverStore.jks");
+                        SSLEngine engine = initSSLContext(jksIn, "tttttt").createSSLEngine();//创建SSLEngine
+                        engine.setUseClientMode(false);
+                        ch.pipeline().addLast("tls", new SslHandler(engine));
                         if (nettyServerConfig.isLog()) {
                             ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
                         }
                         ch.pipeline().addLast(new IdleStateHandler(60, 20, 0, TimeUnit.SECONDS))
-                                .addLast(new HeartbeatHandler())
-                                .addLast(new NettyMessageEncoder())
+                                .addLast(new HeartbeatHandler());
+                        if (channelHandlers != null) {
+                            ch.pipeline().addLast(channelHandlers);
+                        }
+                        ch.pipeline().addLast(new NettyMessageEncoder())
                                 .addLast(new NettyMessageDecoder());
                         ch.pipeline().addLast(defaultEventExecutorGroup, new NettyServerHandler());
                     }
@@ -124,6 +141,21 @@ public class NettyServer {
             }
         } catch (Exception e) {
             LOGGER.error("Server shutdown exception.", e);
+        }
+    }
+
+    public static SSLContext initSSLContext(InputStream jksIn, String password) {
+        try {
+            KeyStore ks = KeyStore.getInstance("JKS");
+            char[] chars = password.toCharArray();
+            ks.load(jksIn, chars);
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(ks, chars);
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), null, null);
+            return sslContext;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
